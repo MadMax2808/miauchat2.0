@@ -1,0 +1,8 @@
+.list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(53, 63, 52, 0.5);
+  
+
+}
