@@ -1,13 +1,19 @@
 import React from "react";
 import "./detail.css";
+import { auth } from "../../lib/firebase";
+import { useChatStore } from "../../lib/chatStore";
+import { useUserStore } from "../../lib/userStore";
 
 const Detail = () => {
+  const { chatId, user, isCurrentUserBlocked, isReceiverBlocked } =
+    useChatStore();
+  const { currentUser } = useUserStore();
   return (
     <div className="detail">
       <div className="user">
-        <img src="./avatar.png" alt="" />
-        <h2>John Doe</h2>
-        <p>Web Developer</p>
+        <img src={user?.avatar || "./avatar.png"} alt="" />
+        <h2>{user?.username}</h2>
+        <p>En linea?</p>
       </div>
 
       <div className="info">
@@ -18,7 +24,9 @@ const Detail = () => {
           </div>
         </div>
         <button className="">Llamar</button>
-        <button className="logout">Logout</button>
+        <button className="logout" onClick={() => auth.signOut()}>
+          Logout
+        </button>
       </div>
     </div>
   );

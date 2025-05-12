@@ -83,24 +83,26 @@
     .message {
       max-width: 70%;
       display: flex;
-      gap: 20px;
+      align-items: flex-start; /* Asegura que el avatar y el texto estén alineados */
+      gap: 10px; /* Ajusta el espacio entre el avatar y el texto */
 
       &.own {
         align-self: flex-end;
 
         .texts {
           p {
-            background-color:  rgb(102, 116, 103)
+            background-color: rgb(102, 116, 103);
           }
         }
       }
 
-      img {
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
+      img.message-avatar {
+        width: 40px; /* Tamaño del avatar */
+        height: 40px;
+        border-radius: 50%; /* Hace que la imagen sea circular */
         object-fit: cover;
       }
+
       .texts {
         flex: 1;
         display: flex;
@@ -173,7 +175,7 @@
     }
 
     .sendButton {
-      background-color:rgb(102, 116, 103);
+      background-color: rgb(102, 116, 103);
       color: white;
       padding: 10px 20px;
       border: none;
@@ -181,7 +183,7 @@
       cursor: pointer;
 
       &:disabled {
-        background-color:rgb(102, 116, 103);
+        background-color: rgb(102, 116, 103);
         cursor: not-allowed;
       }
     }
