@@ -13,6 +13,15 @@ import {
   updateDoc,
 } from "firebase/firestore";
 
+// Función para obtener la cantidad de amigos de un usuario
+async function getFriendsCount(userId) {
+  const userChatsRef = doc(db, "userchats", userId);
+  const userChatsSnap = await getDoc(userChatsRef);
+  if (!userChatsSnap.exists()) return 0;
+  const chats = userChatsSnap.data().chats || [];
+  return chats.filter(chat => !chat.isGroup).length;
+}
+
 const Chat = () => {
   const [chat, setChat] = useState();
   const [open, setOpen] = useState(false);
@@ -21,6 +30,7 @@ const Chat = () => {
     file: null,
     url: "",
   });
+  const [patiracha, setPatiracha] = useState(0); // Estado para la patiracha
 
   const { currentUser } = useUserStore();
   const { chatId, user } = useChatStore();
@@ -40,6 +50,17 @@ const Chat = () => {
       unSub();
     };
   }, [chatId]);
+
+  // Obtener la patiracha del usuario con el que chateas
+  useEffect(() => {
+    const fetchPatiracha = async () => {
+      if (user?.id) {
+        const count = await getFriendsCount(user.id);
+        setPatiracha(Math.min(count, 9));
+      }
+    };
+    fetchPatiracha();
+  }, [user]);
 
   const handleEmoji = (e) => {
     setText((prev) => prev + e.emoji);
@@ -68,7 +89,7 @@ const Chat = () => {
       await updateDoc(doc(db, "chats", chatId), {
         messages: arrayUnion({
           senderId: currentUser.id,
-          senderAvatar: currentUser.avatar, // Agregar avatar del remitente
+          senderAvatar: currentUser.avatar,
           text,
           createdAt: new Date(),
           ...(imgUrl && { img: imgUrl }),
@@ -114,24 +135,36 @@ const Chat = () => {
     const date = new Date(timestamp?.seconds * 1000 || Date.now());
     const now = new Date();
 
-    // Si el mensaje fue enviado en los últimos 60 segundos
     if (Math.abs(now - date) < 60000) {
       return "ahora";
     }
 
-    // Formatear la fecha sin segundos
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
+
   return (
     <div className="chat">
       <div className="top">
         <div className="user">
           <img src={user.avatar || "./avatar.png"} alt="" />
           <div className="texts">
-            <span>{user.username}</span>
+            <span>
+              {user.username}
+              {patiracha > 0 && (
+                <img
+                  src={`./PatiRacha/72px (${patiracha}).png`}
+                  alt={`Patiracha ${patiracha}`}
+                  style={{
+                    width: 32,
+                    height: 32,
+                    marginLeft: 8,
+                    verticalAlign: "middle",
+                  }}
+                />
+              )}
+            </span>
             <p>dgfdfgdfg</p>
           </div>
-          <img src="./PatiRacha/72px (1).png" alt="" className="pati" />
         </div>
         <div className="icons">
           <img src="./phone.png" alt="" />
@@ -149,7 +182,7 @@ const Chat = () => {
             key={index}
           >
             <img
-              src={message.senderAvatar || "./avatar.png"} // Mostrar el avatar del remitente
+              src={message.senderAvatar || "./avatar.png"}
               alt="Avatar"
               className="message-avatar"
             />
