@@ -1,0 +1,86 @@
+.videollamada-container {
+  position: fixed; /* Fija el contenedor en la pantalla */
+  top: 20%; /* Ajusta la distancia desde la parte superior */
+  left: 50%; /* Centra horizontalmente */
+  transform: translate(-50%, -10%); /* Ajusta el centrado */
+  z-index: 1000; /* Asegúrate de que esté por encima de otros elementos */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(59, 66, 59, 0.9);/* Fondo oscuro */
+  border-radius: 10px;
+  padding: 50px;
+  width: 100%; /* Ajusta el ancho para pantallas pequeñas */
+  max-width: 800px; /* Ancho máximo */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.video-wrapper {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  max-width: 700px;
+  margin-bottom: 20px;
+}
+
+.local-video,
+.remote-video {
+  width: 50%; /* Ocupa la mitad del espacio disponible */
+  height: 300px;
+  background-color: rgba(26, 40, 17, 0.3); /* Fondo oscuro para videos */
+  border-radius: 10px;
+  object-fit: cover;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.control-button {
+  background-color: rgb(102, 116, 103); /* Color similar al botón de enviar */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.control-button:hover {
+  background-color: rgba(102, 116, 103, 0.9); /* Más oscuro al pasar el mouse */
+}
+
+.control-button:active {
+  background-color: rgba(80, 90, 80, 1); /* Aún más oscuro al hacer clic */
+}
+
+.control-button.end-call {
+  background-color: rgb(184, 93, 93); /* Rojo para finalizar llamada */
+}
+
+.control-button.end-call:hover {
+  background-color: rgba(184, 93, 93, 0.9);
+}
+
+.control-button.end-call:active {
+  background-color: rgba(150, 70, 70, 1);
+}
+.videollamada-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.videollamada-container::-webkit-scrollbar-track {
+  background: rgba(193, 217, 193, 0.05);
+  border-radius: 10px;
+}
+
+.videollamada-container::-webkit-scrollbar-thumb {
+  background: rgba(53, 63, 52, 0.2);
+  border-radius: 10px;
+}

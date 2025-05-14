@@ -15,6 +15,7 @@ import {
 import CryptoJS from "crypto-js";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLocationDot } from "@fortawesome/free-solid-svg-icons";
+import Videollamada from "../videollamada";
 
 async function getFriendsCount(userId) {
   const userChatsRef = doc(db, "userchats", userId);
@@ -28,6 +29,7 @@ const Chat = () => {
   const [encryptionEnabled, setEncryptionEnabled] = useState(false);
   const [isActive, setIsActive] = useState(false);
   const [isGroup, setIsGroup] = useState(false);
+  const [isVideoCallActive, setIsVideoCallActive] = useState(false);
 
   const [chat, setChat] = useState();
   const [open, setOpen] = useState(false);
@@ -145,6 +147,14 @@ const Chat = () => {
       }
     }
   }, [chatId, chat?.messages, currentUser.id]);
+
+  const handleStartVideoCall = () => {
+    setIsVideoCallActive(true); // Activa la videollamada
+  };
+
+  const handleEndVideoCall = () => {
+    setIsVideoCallActive(false); // Finaliza la videollamada
+  };
 
   const handleEmoji = (e) => {
     setText((prev) => prev + e.emoji);
@@ -272,7 +282,12 @@ const Chat = () => {
             {encryptionEnabled ? "🔒 Encriptado" : "🔓 Normal"}
           </button>
 
-          <img src="./video.png" alt="" />
+          <img
+            src="./video.png"
+            alt="Iniciar videollamada"
+            onClick={handleStartVideoCall}
+            style={{ cursor: "pointer" }}
+          />
           <img src="./info.png" alt="" />
         </div>
       </div>
@@ -390,6 +405,13 @@ const Chat = () => {
           Enviar
         </button>
       </div>
+
+      {isVideoCallActive && (
+        <Videollamada
+          chatId={chatId}
+          onEndCall={() => setIsVideoCallActive(false)}
+        />
+      )}
     </div>
   );
 };
