@@ -5,6 +5,8 @@ import { useChatStore } from "../../lib/chatStore";
 import { useUserStore } from "../../lib/userStore";
 import { doc, getDoc, setDoc, updateDoc, arrayUnion } from "firebase/firestore";
 import { db } from "../../lib/firebase";
+import { onSnapshot } from "firebase/firestore";
+
 
 const Detail = () => {
   const { chatId, user, isCurrentUserBlocked, isReceiverBlocked } =
@@ -31,22 +33,17 @@ const Detail = () => {
   }, [chatId]);
 
   useEffect(() => {
-    const fetchTasks = async () => {
-      if (isGroup && chatId) {
-        const chatDocRef = doc(db, "chats", chatId);
-        const chatDoc = await getDoc(chatDocRef);
+    if (isGroup && chatId) {
+      const chatDocRef = doc(db, "chats", chatId);
 
-        if (chatDoc.exists()) {
-          setTasks(chatDoc.data().tasks || []);
-        } else {
-          // Si no existe el documento, inicializa las tareas
-          await setDoc(chatDocRef, { tasks: [] });
-          setTasks([]);
+      const unsubscribe = onSnapshot(chatDocRef, (docSnap) => {
+        if (docSnap.exists()) {
+          setTasks(docSnap.data().tasks || []);
         }
-      }
-    };
+      });
 
-    fetchTasks();
+      return () => unsubscribe(); // limpiar el listener al desmontar
+    }
   }, [chatId, isGroup]);
 
   const addTask = async () => {
