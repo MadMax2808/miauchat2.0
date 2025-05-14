@@ -195,7 +195,17 @@ function ChatList() {
               backgroundColor: chat?.isSeen ? "transparent" : "#353F34",
             }}
           >
-            <img src={chat.user.avatar || "./avatar.png"} alt="" />
+            <img
+              src={chat.user.avatar || "./avatar.png"}
+              alt=""
+              className={
+                !chat.isGroup
+                  ? chat.user.isActive
+                    ? "active-border"
+                    : "inactive-border"
+                  : ""
+              }
+            />
             <div className="texts">
               <span>
                 {chat.user.username}
