@@ -76,31 +76,21 @@ function ChatList() {
 
           setChats(chatData.sort((a, b) => b.updatedAt - a.updatedAt));
 
-          // Configurar listeners en tiempo real para el estado de actividad de cada usuario
-          const listeners = chatData
-            .filter((chat) => !chat.isGroup && chat.user && chat.user.id)
-            .map((chat) => {
-              const userDocRef = doc(db, "users", chat.user.id);
+          // Calcular patirachaCounts para cada usuario
+          const newPatirachaCounts = {};
+          for (const chat of chatData) {
+            if (!chat.isGroup && chat.user && chat.user.id) {
+              const userChatsRef = doc(db, "userchats", chat.user.id);
+              const userChatsSnap = await getDoc(userChatsRef);
+              if (userChatsSnap.exists()) {
+                const userChats = userChatsSnap.data().chats || [];
+                const friendCount = userChats.filter((c) => !c.isGroup).length;
+                newPatirachaCounts[chat.user.id] = Math.min(friendCount, 9);
+              }
+            }
+          }
 
-              return onSnapshot(userDocRef, (snapshot) => {
-                if (snapshot.exists()) {
-                  const isActive = snapshot.data().isActive;
-
-                  setChats((prevChats) =>
-                    prevChats.map((prevChat) =>
-                      prevChat.user.id === chat.user.id
-                        ? { ...prevChat, user: { ...prevChat.user, isActive } }
-                        : prevChat
-                    )
-                  );
-                }
-              });
-            });
-
-          // Limpiar listeners al desmontar
-          return () => {
-            listeners.forEach((unSub) => unSub());
-          };
+          setPatirachaCounts(newPatirachaCounts);
         }
       );
 
@@ -109,7 +99,7 @@ function ChatList() {
       };
     }
   }, [currentUser.id]);
-  
+
   const handleSelect = async (chat) => {
     const userChats = chats.map((item) => {
       const { user, ...rest } = item;
@@ -185,7 +175,7 @@ function ChatList() {
           if (imgNum > 0) {
             patirachaImg = (
               <img
-                src={`./PatiRacha/72px (${imgNum}).png`}
+                src={`/PatiRacha/72px (${imgNum}).png`}
                 alt=""
                 style={{
                   width: 32,
