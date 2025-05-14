@@ -103,6 +103,14 @@
       object-fit: cover;
     }
 
+    img.active-border {
+      border: 3px solid #4caf50; /* Verde para activo */
+    }
+
+    img.inactive-border {
+      border: 3px solid #bb0000; /* Gris para inactivo */
+    }
+
     .texts {
       display: flex;
       flex-direction: column;

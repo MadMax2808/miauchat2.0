@@ -180,7 +180,7 @@ const Detail = () => {
         </h2>
         {/* Mostrar estado en línea solo si NO es grupo */}
         {!isGroup && (
-          <p style={{ color: isActive ? "green" : "gray" }}>
+          <p style={{ color: isActive ? "green" : "Red" }}>
             {isActive ? "En línea" : "Desconectado"}
           </p>
         )}
