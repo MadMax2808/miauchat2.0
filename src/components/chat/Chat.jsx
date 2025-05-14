@@ -430,7 +430,7 @@ const Chat = () => {
             </>
           )}
         </div>
-        ;
+        
         <button className="sendButton" onClick={handleSend}>
           Enviar
         </button>
