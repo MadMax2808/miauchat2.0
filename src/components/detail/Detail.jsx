@@ -6,6 +6,7 @@ import { useUserStore } from "../../lib/userStore";
 import { doc, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
 import { db } from "../../lib/firebase";
 import { onSnapshot } from "firebase/firestore";
+import emailjs from "emailjs-com";
 
 // Función para obtener la cantidad de amigos de un usuario
 async function getFriendsCount(userId) {
@@ -20,6 +21,8 @@ const Detail = () => {
   const { chatId, user, isCurrentUserBlocked, isReceiverBlocked } =
     useChatStore();
   const { currentUser } = useUserStore();
+  const [showModal, setShowModal] = useState(false);
+  const [emailBody, setEmailBody] = useState("");
 
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState("");
@@ -158,6 +161,33 @@ const Detail = () => {
     }
   };
 
+  const handleSendEmail = () => {
+    if (!emailBody.trim()) return alert("El mensaje no puede estar vacío");
+console.log("Enviando correo a:", user.email);
+    emailjs
+      .send(
+        "service_xh8mftu", 
+        "template_brlynnu", 
+        {
+          to_email: user.email,
+          name: currentUser.username,
+          message: emailBody,
+        },
+        "5T3n0KY39W0MVgBrl" 
+      )
+      .then(
+        (result) => {
+          alert("Correo enviado con éxito");
+          setEmailBody("");
+          setShowModal(false);
+        },
+        (error) => {
+          console.error("Error al enviar:", error);
+          alert("Error al enviar el correo");
+        }
+      );
+  };
+
   return (
     <div className="detail">
       <div className="user">
@@ -235,6 +265,36 @@ const Detail = () => {
               </button>
             </div>
           </div>
+        )}
+
+        {!isGroup && user?.email && (
+          <>
+            <button
+              className="send-email-btn"
+              onClick={() => setShowModal(true)}
+            >
+              Enviar Correo
+            </button>
+
+            {showModal && (
+              <div className="modal-overlay">
+                <div className="modal-content">
+                  <h3>Enviar correo a {user.username}</h3>
+                  <textarea
+                    value={emailBody}
+                    onChange={(e) => setEmailBody(e.target.value)}
+                    placeholder="Escribe tu mensaje..."
+                  ></textarea>
+                  <div className="modal-actions">
+                    <button onClick={handleSendEmail}>Enviar</button>
+                    <button onClick={() => setShowModal(false)}>
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
