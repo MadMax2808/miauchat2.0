@@ -13,6 +13,8 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import CryptoJS from "crypto-js";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faLocationDot } from "@fortawesome/free-solid-svg-icons";
 
 async function getFriendsCount(userId) {
   const userChatsRef = doc(db, "userchats", userId);
@@ -172,6 +174,37 @@ const Chat = () => {
     }
   };
 
+  const handleSendLocation = () => {
+    if (!navigator.geolocation) {
+      alert("La geolocalización no es soportada por tu navegador.");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+        try {
+          await updateDoc(doc(db, "chats", chatId), {
+            messages: arrayUnion({
+              senderId: currentUser.id,
+              senderAvatar: currentUser.avatar,
+              text: mapsUrl,
+              isLocation: true,
+              encrypted: false,
+              createdAt: new Date(),
+              isSeen: false,
+            }),
+          });
+        } catch (err) {
+          alert("No se pudo enviar la ubicación.");
+        }
+      },
+      () => {
+        alert("No se pudo obtener tu ubicación.");
+      }
+    );
+  };
+
   const formatDate = (timestamp) => {
     const date = new Date(timestamp?.seconds * 1000 || Date.now());
     const now = new Date();
@@ -241,7 +274,28 @@ const Chat = () => {
             <div className="texts">
               {message.img && <img src={message.img} alt="" />}
               <p>
-                {message.encrypted ? decryptText(message.text) : message.text}
+                {message.isLocation ? (
+                  <a
+                    href={message.text}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      color: "#4285F4",
+                      textDecoration: "underline",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
+                    }}
+                  >
+                    <FontAwesomeIcon
+                      icon={faLocationDot}
+                      style={{ color: "#4285F4" }}
+                    />
+                    Ver ubicación en Google Maps
+                  </a>
+                ) : message.encrypted
+                ? decryptText(message.text)
+                : message.text}
               </p>
 
               <span className="message-date">
@@ -282,6 +336,15 @@ const Chat = () => {
             style={{ display: "none" }}
             onChange={handleImg}
           />
+          {/* Botón para enviar ubicación */}
+          <button
+            className="locationButton"
+            title="Enviar ubicación"
+            onClick={handleSendLocation}
+            style={{ background: "none", border: "none", cursor: "pointer" }}
+          >
+            <FontAwesomeIcon icon={faLocationDot} style={{ color: "#FFFFFF" }} />
+          </button>
         </div>
         <input
           type="text"
