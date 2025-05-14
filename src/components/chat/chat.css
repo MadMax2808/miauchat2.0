@@ -22,7 +22,7 @@
         width: 40px;
         height: 40px;
       }
-      
+
       img {
         width: 60px;
         height: 60px;
@@ -193,4 +193,46 @@
       }
     }
   }
+  .encryption-button {
+    background-color: rgba(
+      102,
+      116,
+      103,
+      0.8
+    ); /* Color similar al botón de enviar */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+  }
+
+  .encryption-button:hover {
+    background-color: rgba(102, 116, 103, 1); /* Más oscuro al pasar el mouse */
+  }
+
+  .encryption-button:active {
+    background-color: rgba(80, 90, 80, 1); /* Aún más oscuro al hacer clic */
+  }
+
+  .encryption-button.disabled {
+    background-color: rgb(146, 185, 146); /* Color más claro para modo "Normal" */
+    color: rgba(255, 255, 255);
+  }
+
+  .check-marks {
+  margin-left: 5px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.check-marks.not-seen {
+  color: rgb(255, 255, 255); /* Color para mensajes no vistos */
+}
+
+.check-marks.seen {
+  color: rgb(100, 158, 100); /* Color para mensajes vistos */
+}
 }

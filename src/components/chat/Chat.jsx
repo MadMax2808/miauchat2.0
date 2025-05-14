@@ -12,8 +12,8 @@ import {
   onSnapshot,
   updateDoc,
 } from "firebase/firestore";
+import CryptoJS from "crypto-js";
 
-// Función para obtener la cantidad de amigos de un usuario
 async function getFriendsCount(userId) {
   const userChatsRef = doc(db, "userchats", userId);
   const userChatsSnap = await getDoc(userChatsRef);
@@ -23,6 +23,8 @@ async function getFriendsCount(userId) {
 }
 
 const Chat = () => {
+  const [encryptionEnabled, setEncryptionEnabled] = useState(false);
+
   const [chat, setChat] = useState();
   const [open, setOpen] = useState(false);
   const [text, setText] = useState("");
@@ -36,6 +38,18 @@ const Chat = () => {
   const { chatId, user } = useChatStore();
 
   const endRef = useRef(null);
+
+  //DESENCRYPTAR MENSAJES
+  const secretKey = "PatiRacha"; // Idealmente deberías guardarla más segura
+
+  const encryptText = (text) => {
+    return CryptoJS.AES.encrypt(text, secretKey).toString();
+  };
+
+  const decryptText = (cipherText) => {
+    const bytes = CryptoJS.AES.decrypt(cipherText, secretKey);
+    return bytes.toString(CryptoJS.enc.Utf8);
+  };
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -75,6 +89,26 @@ const Chat = () => {
     }
   }, [user]);
 
+  useEffect(() => {
+    if (chatId && chat?.messages) {
+      const unseenMessages = chat.messages.filter(
+        (message) => message.senderId !== currentUser.id && !message.isSeen
+      );
+
+      if (unseenMessages.length > 0) {
+        const updatedMessages = chat.messages.map((message) =>
+          message.senderId !== currentUser.id
+            ? { ...message, isSeen: true }
+            : message
+        );
+
+        updateDoc(doc(db, "chats", chatId), {
+          messages: updatedMessages,
+        }).catch((err) => console.log(err));
+      }
+    }
+  }, [chatId, chat?.messages, currentUser.id]);
+
   const handleEmoji = (e) => {
     setText((prev) => prev + e.emoji);
     setOpen(false);
@@ -99,47 +133,23 @@ const Chat = () => {
         imgUrl = await upload(img.file);
       }
 
+      const encryptedText = encryptionEnabled ? encryptText(text) : text;
+
       await updateDoc(doc(db, "chats", chatId), {
         messages: arrayUnion({
           senderId: currentUser.id,
           senderAvatar: currentUser.avatar,
-          text,
+          text: encryptedText,
+          encrypted: encryptionEnabled,
           createdAt: new Date(),
+          isSeen: false, // Agregar el campo isSeen
           ...(imgUrl && { img: imgUrl }),
         }),
-      });
-
-      const userIDs = [currentUser.id, user.id];
-
-      userIDs.forEach(async (id) => {
-        const userChatsRef = doc(db, "userchats", id);
-        const userChatsSnapshot = await getDoc(userChatsRef);
-
-        if (userChatsSnapshot.exists()) {
-          const userChatsData = userChatsSnapshot.data();
-
-          const chatIndex = userChatsData.chats.findIndex(
-            (c) => c.chatId === chatId
-          );
-
-          userChatsData.chats[chatIndex].lastMessage = text;
-          userChatsData.chats[chatIndex].isSeen =
-            id === currentUser.id ? true : false;
-          userChatsData.chats[chatIndex].updatedAt = Date.now();
-
-          await updateDoc(userChatsRef, {
-            chats: userChatsData.chats,
-          });
-        }
       });
     } catch (err) {
       console.log(err);
     } finally {
-      setImg({
-        file: null,
-        url: "",
-      });
-
+      setImg({ file: null, url: "" });
       setText("");
     }
   };
@@ -181,7 +191,15 @@ const Chat = () => {
           </div>
         </div>
         <div className="icons">
-          <img src="./phone.png" alt="" />
+          <button
+            className={`encryption-button ${
+              !encryptionEnabled ? "disabled" : ""
+            }`}
+            onClick={() => setEncryptionEnabled((prev) => !prev)}
+          >
+            {encryptionEnabled ? "🔒 Encriptado" : "🔓 Normal"}
+          </button>
+
           <img src="./video.png" alt="" />
           <img src="./info.png" alt="" />
         </div>
@@ -202,9 +220,21 @@ const Chat = () => {
             />
             <div className="texts">
               {message.img && <img src={message.img} alt="" />}
-              <p>{message.text}</p>
+              <p>
+                {message.encrypted ? decryptText(message.text) : message.text}
+              </p>
+
               <span className="message-date">
                 {formatDate(message.createdAt)}
+                {message.senderId === currentUser?.id && (
+                  <span
+                    className={`check-marks ${
+                      message.isSeen ? "seen" : "not-seen"
+                    }`}
+                  >
+                    ✔✔
+                  </span>
+                )}
               </span>
             </div>
           </div>
