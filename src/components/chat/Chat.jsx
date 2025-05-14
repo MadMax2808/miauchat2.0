@@ -24,6 +24,7 @@ async function getFriendsCount(userId) {
 
 const Chat = () => {
   const [encryptionEnabled, setEncryptionEnabled] = useState(false);
+  const [isActive, setIsActive] = useState(false);
 
   const [chat, setChat] = useState();
   const [open, setOpen] = useState(false);
@@ -86,6 +87,23 @@ const Chat = () => {
       };
     } else {
       setPatiracha(0);
+    }
+  }, [user]);
+
+  // Escuchar el estado de actividad del usuario con el que chateas
+  useEffect(() => {
+    if (user?.id && !user.isGroup) {
+      const userDocRef = doc(db, "users", user.id);
+      const unsubscribe = onSnapshot(userDocRef, (docSnap) => {
+        if (docSnap.exists()) {
+          setIsActive(!!docSnap.data().isActive);
+        } else {
+          setIsActive(false);
+        }
+      });
+      return () => unsubscribe();
+    } else {
+      setIsActive(false);
     }
   }, [user]);
 
@@ -187,7 +205,9 @@ const Chat = () => {
                 />
               )}
             </span>
-            <p>dgfdfgdfg</p>
+            <p style={{ color: isActive ? "green" : "Red" }}>
+              {!user.isGroup ? (isActive ? "En línea" : "Desconectado") : ""}
+            </p>
           </div>
         </div>
         <div className="icons">
