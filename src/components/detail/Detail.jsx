@@ -25,6 +25,7 @@ const Detail = () => {
   const [newTask, setNewTask] = useState("");
   const [isGroup, setIsGroup] = useState(false);
   const [patiracha, setPatiracha] = useState(0);
+  const [isActive, setIsActive] = useState(false);
 
   useEffect(() => {
     const fetchChatData = async () => {
@@ -62,6 +63,23 @@ const Detail = () => {
       };
     } else {
       setPatiracha(0); // No mostrar patiracha para grupos
+    }
+  }, [user]);
+
+  // Escuchar el estado de actividad del usuario mostrado
+  useEffect(() => {
+    if (user?.id && !user.isGroup) {
+      const userDocRef = doc(db, "users", user.id);
+      const unsubscribe = onSnapshot(userDocRef, (docSnap) => {
+        if (docSnap.exists()) {
+          setIsActive(!!docSnap.data().isActive);
+        } else {
+          setIsActive(false);
+        }
+      });
+      return () => unsubscribe();
+    } else {
+      setIsActive(false);
     }
   }, [user]);
 
@@ -160,7 +178,12 @@ const Detail = () => {
             />
           )}
         </h2>
-        <p>En linea?</p>
+        {/* Mostrar estado en línea solo si NO es grupo */}
+        {!isGroup && (
+          <p style={{ color: isActive ? "green" : "gray" }}>
+            {isActive ? "En línea" : "Desconectado"}
+          </p>
+        )}
       </div>
 
       <div className="info">

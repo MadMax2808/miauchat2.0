@@ -2,7 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
-
+import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_API_KEY,
@@ -19,3 +19,16 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth();
 export const db = getFirestore();
 export const storage = getStorage();
+
+// Cambia el estado de actividad del usuario
+export async function setUserActiveStatus(uid, isActive) {
+  if (!uid) return;
+  try {
+    await updateDoc(doc(db, "users", uid), {
+      isActive,
+      lastSeen: serverTimestamp(),
+    });
+  } catch (e) {
+    console.error("Error actualizando estado de usuario:", e);
+  }
+}
