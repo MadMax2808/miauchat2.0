@@ -26,12 +26,62 @@ const Login = () => {
       });
     }
   };
+  const validatePassword = (password) => {
+    // Requisitos básicos: al menos 6 caracteres
+    if (password.length < 6) {
+      toast.error("La contraseña debe tener al menos 6 caracteres");
+      return false;
+    }
 
+    return true;
+  };
+  const validateUsername = (username) => {
+    // Validar que el nombre de usuario no esté vacío y tenga al menos 3 caracteres
+    if (!username || username.trim().length < 3) {
+      toast.error("El nombre de usuario debe tener al menos 3 caracteres");
+      return false;
+    }
+    return true;
+  };
+  const validateEmail = (email) => {
+    // Expresión regular para validar correos electrónicos
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!regex.test(email)) {
+      toast.error("Por favor, ingresa un correo electrónico válido");
+      return false;
+    }
+    return true;
+  };
   const handleRegister = async (e) => {
     e.preventDefault();
     setLoading(true);
     const formData = new FormData(e.target);
     const { username, email, password } = Object.fromEntries(formData);
+
+    // Validar nombre de usuario
+    if (!validateUsername(username)) {
+      setLoading(false);
+      return;
+    }
+
+    // Validar correo electrónico
+    if (!validateEmail(email)) {
+      setLoading(false);
+      return;
+    }
+
+    // Validar contraseña
+    if (!validatePassword(password)) {
+      setLoading(false);
+      return;
+    }
+
+    // Validar si se subió una foto de perfil
+    if (!avatar.file) {
+      toast.error("Por favor, sube una foto de perfil");
+      setLoading(false);
+      return;
+    }
 
     try {
       const res = await createUserWithEmailAndPassword(auth, email, password);
@@ -77,7 +127,7 @@ const Login = () => {
       setLoading(false);
     }
   };
- 
+
   return (
     <div className="login">
       <div className="item">
