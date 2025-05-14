@@ -7,13 +7,30 @@ import { db } from "../../../lib/firebase";
 import { useChatStore } from "../../../lib/chatStore";
 import AddGroup from "./addGroup/addGroup";
 import { FaUserPlus, FaUsers, FaTimes } from "react-icons/fa";
+
+// Función para obtener la cantidad de amigos de un usuario
+async function getFriendsCount(userId) {
+  const userChatsRef = doc(db, "userchats", userId);
+  const userChatsSnap = await getDoc(userChatsRef);
+  if (!userChatsSnap.exists()) return 0;
+  const chats = userChatsSnap.data().chats || [];
+  return chats.filter(chat => !chat.isGroup).length;
+}
+
 function ChatList() {
   const [addMode, setAddMode] = useState(false);
   const [chats, setChats] = useState([]);
   const [groupMode, setGroupMode] = useState(false);
+  const [patirachaCounts, setPatirachaCounts] = useState({}); // Nuevo estado
 
-  const { currentUser } = useUserStore();
+  const { currentUser, friendsCount, fetchFriendsCount } = useUserStore();
   const { chatId, changeChat } = useChatStore();
+
+  useEffect(() => {
+    if (currentUser?.id) {
+      fetchFriendsCount(currentUser.id);
+    }
+  }, [currentUser, fetchFriendsCount]);
 
   useEffect(() => {
     const unSub = onSnapshot(
@@ -57,6 +74,21 @@ function ChatList() {
         const chatData = await Promise.all(promises);
 
         setChats(chatData.sort((a, b) => b.updatedAt - a.updatedAt));
+
+        // Obtener la patiracha de cada usuario (solo para chats que no son grupo)
+        const friendPromises = chatData
+          .filter(chat => !chat.isGroup && chat.user && chat.user.id)
+          .map(async chat => {
+            const count = await getFriendsCount(chat.user.id);
+            return { userId: chat.user.id, count };
+          });
+
+        const counts = await Promise.all(friendPromises);
+        const countsObj = {};
+        counts.forEach(({ userId, count }) => {
+          countsObj[userId] = count;
+        });
+        setPatirachaCounts(countsObj);
       }
     );
 
@@ -121,22 +153,46 @@ function ChatList() {
         </div>
       </div>
 
-      {chats.map((chat) => (
-        <div
-          className="item"
-          key={chat.chatId}
-          onClick={() => handleSelect(chat)}
-          style={{
-            backgroundColor: chat?.isSeen ? "transparent" : "#353F34",
-          }}
-        >
-          <img src={chat.user.avatar || "./avatar.png"} alt="" />
-          <div className="texts">
-            <span>{chat.user.username}</span>
-            <p>{chat.lastMessage}</p>
+      <div style={{ color: "#fff", fontWeight: "bold", textAlign: "center", margin: "10px 0" }}>
+        Amigos agregados: {friendsCount}
+      </div>
+
+      {chats.map((chat) => {
+        let patirachaImg = null;
+        if (!chat.isGroup && chat.user && chat.user.id) {
+          const count = patirachaCounts[chat.user.id] || 0;
+          const imgNum = Math.min(count, 9); // Máximo 9
+          if (imgNum > 0) {
+            patirachaImg = (
+              <img
+                src={`./PatiRacha/72px (${imgNum}).png`}
+                alt=''
+                style={{ width: 32, height: 32, marginLeft: 8, verticalAlign: "middle" }}
+              />
+            );
+          }
+        }
+
+        return (
+          <div
+            className="item"
+            key={chat.chatId}
+            onClick={() => handleSelect(chat)}
+            style={{
+              backgroundColor: chat?.isSeen ? "transparent" : "#353F34",
+            }}
+          >
+            <img src={chat.user.avatar || "./avatar.png"} alt="" />
+            <div className="texts">
+              <span>
+                {chat.user.username}
+                {patirachaImg}
+              </span>
+              <p>{chat.lastMessage}</p>
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
 
       {addMode && <AddUser />}
       {groupMode && <AddGroup />}
