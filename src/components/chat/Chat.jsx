@@ -56,6 +56,31 @@ const Chat = () => {
     const bytes = CryptoJS.AES.decrypt(cipherText, secretKey);
     return bytes.toString(CryptoJS.enc.Utf8);
   };
+  const [otraPatiracha, setOtraPatiracha] = useState(0); // Estado para la otra patiracha
+
+  // Calcular la otra patiracha basada en el currentUser
+  useEffect(() => {
+    if (currentUser?.id) {
+      const userDocRef = doc(db, "users", currentUser.id);
+
+      const unSub = onSnapshot(userDocRef, (snapshot) => {
+        if (snapshot.exists()) {
+          const userData = snapshot.data();
+          // Ejemplo: Calcular otra patiracha basada en un campo personalizado
+          const customValue = userData.customField || 0; // Reemplaza "customField" con el campo deseado
+          setOtraPatiracha(Math.min(customValue, 9)); // Limitar el valor máximo a 9
+        } else {
+          setOtraPatiracha(0);
+        }
+      });
+
+      return () => {
+        unSub();
+      };
+    } else {
+      setOtraPatiracha(0);
+    }
+  }, [currentUser]);
 
   useEffect(() => {
     // Obtener si el chat es un grupo desde Firestore
@@ -392,7 +417,7 @@ const Chat = () => {
           onChange={(e) => setText(e.target.value)}
         />
         <div className="emoji">
-          {patiracha === 9 && ( // Mostrar solo si patiracha está al máximo
+          {otraPatiracha === 9 && ( // Mostrar solo si otraPatiracha está al máximo
             <>
               <img
                 src="./emoji.png"
@@ -405,6 +430,7 @@ const Chat = () => {
             </>
           )}
         </div>
+        ;
         <button className="sendButton" onClick={handleSend}>
           Enviar
         </button>
