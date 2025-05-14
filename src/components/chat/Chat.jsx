@@ -392,14 +392,18 @@ const Chat = () => {
           onChange={(e) => setText(e.target.value)}
         />
         <div className="emoji">
-          <img
-            src="./emoji.png"
-            alt=""
-            onClick={() => setOpen((prev) => !prev)}
-          />
-          <div className="picker">
-            <EmojiPicker open={open} onEmojiClick={handleEmoji} />
-          </div>
+          {patiracha === 9 && ( // Mostrar solo si patiracha está al máximo
+            <>
+              <img
+                src="./emoji.png"
+                alt=""
+                onClick={() => setOpen((prev) => !prev)}
+              />
+              <div className="picker">
+                <EmojiPicker open={open} onEmojiClick={handleEmoji} />
+              </div>
+            </>
+          )}
         </div>
         <button className="sendButton" onClick={handleSend}>
           Enviar
