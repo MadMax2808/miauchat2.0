@@ -131,6 +131,7 @@ const Chat = () => {
             <span>{user.username}</span>
             <p>dgfdfgdfg</p>
           </div>
+          <img src="./PatiRacha/72px (1).png" alt="" className="pati" />
         </div>
         <div className="icons">
           <img src="./phone.png" alt="" />
