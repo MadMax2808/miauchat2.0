@@ -19,7 +19,7 @@ async function getFriendsCount(userId) {
   const userChatsSnap = await getDoc(userChatsRef);
   if (!userChatsSnap.exists()) return 0;
   const chats = userChatsSnap.data().chats || [];
-  return chats.filter(chat => !chat.isGroup).length;
+  return chats.filter((chat) => !chat.isGroup).length;
 }
 
 const Chat = () => {
@@ -39,7 +39,7 @@ const Chat = () => {
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, []);
+  }, [chat?.messages]);
 
   useEffect(() => {
     const unSub = onSnapshot(doc(db, "chats", chatId), (res) => {
@@ -53,15 +53,26 @@ const Chat = () => {
 
   // Obtener la patiracha del usuario con el que chateas
   useEffect(() => {
-    const fetchPatiracha = async () => {
-      if (user?.id && !user.isGroup) { // Solo si NO es grupo
-        const count = await getFriendsCount(user.id);
-        setPatiracha(Math.min(count, 9));
-      } else {
-        setPatiracha(0); // No mostrar patiracha para grupos
-      }
-    };
-    fetchPatiracha();
+    if (user?.id && !user.isGroup) {
+      // Solo si NO es grupo
+      const userChatsRef = doc(db, "userchats", user.id);
+
+      const unSub = onSnapshot(userChatsRef, (snapshot) => {
+        if (snapshot.exists()) {
+          const chats = snapshot.data().chats || [];
+          const friendCount = chats.filter((chat) => !chat.isGroup).length;
+          setPatiracha(Math.min(friendCount, 9));
+        } else {
+          setPatiracha(0);
+        }
+      });
+
+      return () => {
+        unSub();
+      };
+    } else {
+      setPatiracha(0);
+    }
   }, [user]);
 
   const handleEmoji = (e) => {

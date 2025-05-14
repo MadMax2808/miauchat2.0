@@ -3,6 +3,7 @@ import "./userinfo.css";
 import { useUserStore } from "../../../lib/userStore";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../../lib/firebase";
+import { onSnapshot } from "firebase/firestore";
 
 // Función para obtener la cantidad de amigos de un usuario
 async function getFriendsCount(userId) {
@@ -10,7 +11,7 @@ async function getFriendsCount(userId) {
   const userChatsSnap = await getDoc(userChatsRef);
   if (!userChatsSnap.exists()) return 0;
   const chats = userChatsSnap.data().chats || [];
-  return chats.filter(chat => !chat.isGroup).length;
+  return chats.filter((chat) => !chat.isGroup).length;
 }
 
 const Userinfo = () => {
@@ -18,13 +19,21 @@ const Userinfo = () => {
   const [patiracha, setPatiracha] = useState(0);
 
   useEffect(() => {
-    const fetchPatiracha = async () => {
-      if (currentUser?.id) {
-        const count = await getFriendsCount(currentUser.id);
-        setPatiracha(Math.min(count, 9));
-      }
-    };
-    fetchPatiracha();
+    if (currentUser?.id) {
+      const userChatsRef = doc(db, "userchats", currentUser.id);
+
+      const unsubscribe = onSnapshot(userChatsRef, (snapshot) => {
+        if (snapshot.exists()) {
+          const chats = snapshot.data().chats || [];
+          const friendCount = chats.filter((chat) => !chat.isGroup).length;
+          setPatiracha(Math.min(friendCount, 9)); // Limitar a un máximo de 9
+        } else {
+          setPatiracha(0); // Si no hay datos, no mostrar patiracha
+        }
+      });
+
+      return () => unsubscribe(); // Limpiar el listener al desmontar
+    }
   }, [currentUser]);
 
   return (
@@ -37,7 +46,12 @@ const Userinfo = () => {
             <img
               src={`./PatiRacha/72px (${patiracha}).png`}
               alt={`Patiracha ${patiracha}`}
-              style={{ width: 32, height: 32, marginLeft: 8, verticalAlign: "middle" }}
+              style={{
+                width: 32,
+                height: 32,
+                marginLeft: 8,
+                verticalAlign: "middle",
+              }}
             />
           )}
         </h2>

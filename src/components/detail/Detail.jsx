@@ -13,11 +13,12 @@ async function getFriendsCount(userId) {
   const userChatsSnap = await getDoc(userChatsRef);
   if (!userChatsSnap.exists()) return 0;
   const chats = userChatsSnap.data().chats || [];
-  return chats.filter(chat => !chat.isGroup).length;
+  return chats.filter((chat) => !chat.isGroup).length;
 }
 
 const Detail = () => {
-  const { chatId, user, isCurrentUserBlocked, isReceiverBlocked } = useChatStore();
+  const { chatId, user, isCurrentUserBlocked, isReceiverBlocked } =
+    useChatStore();
   const { currentUser } = useUserStore();
 
   const [tasks, setTasks] = useState([]);
@@ -42,16 +43,27 @@ const Detail = () => {
 
   // Obtener la patiracha del usuario (solo si no es grupo)
   useEffect(() => {
-    const fetchPatiracha = async () => {
-      if (user?.id && !isGroup) {
-        const count = await getFriendsCount(user.id);
-        setPatiracha(Math.min(count, 9));
-      } else {
-        setPatiracha(0);
-      }
-    };
-    fetchPatiracha();
-  }, [user, isGroup]);
+    if (user?.id && !user.isGroup) {
+      // Solo si NO es grupo
+      const userChatsRef = doc(db, "userchats", user.id);
+
+      const unSub = onSnapshot(userChatsRef, (snapshot) => {
+        if (snapshot.exists()) {
+          const chats = snapshot.data().chats || [];
+          const friendCount = chats.filter((chat) => !chat.isGroup).length;
+          setPatiracha(Math.min(friendCount, 9)); // Limitar a un máximo de 9
+        } else {
+          setPatiracha(0); // Si no hay datos, no mostrar patiracha
+        }
+      });
+
+      return () => {
+        unSub(); // Limpiar el listener al desmontar
+      };
+    } else {
+      setPatiracha(0); // No mostrar patiracha para grupos
+    }
+  }, [user]);
 
   useEffect(() => {
     if (isGroup && chatId) {
@@ -139,7 +151,12 @@ const Detail = () => {
             <img
               src={`./PatiRacha/72px (${patiracha}).png`}
               alt={`Patiracha ${patiracha}`}
-              style={{ width: 32, height: 32, marginLeft: 8, verticalAlign: "middle" }}
+              style={{
+                width: 32,
+                height: 32,
+                marginLeft: 8,
+                verticalAlign: "middle",
+              }}
             />
           )}
         </h2>

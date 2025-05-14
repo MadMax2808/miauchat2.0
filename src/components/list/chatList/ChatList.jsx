@@ -33,9 +33,8 @@ function ChatList() {
   }, [currentUser, fetchFriendsCount]);
 
   useEffect(() => {
-    const unSub = onSnapshot(
-      doc(db, "userchats", currentUser.id),
-      async (res) => {
+    if (currentUser?.id) {
+      const unSub = onSnapshot(doc(db, "userchats", currentUser.id), async (res) => {
         const items = res.data().chats;
 
         const promises = items.map(async (item) => {
@@ -75,26 +74,40 @@ function ChatList() {
 
         setChats(chatData.sort((a, b) => b.updatedAt - a.updatedAt));
 
-        // Obtener la patiracha de cada usuario (solo para chats que no son grupo)
-        const friendPromises = chatData
-          .filter(chat => !chat.isGroup && chat.user && chat.user.id)
-          .map(async chat => {
-            const count = await getFriendsCount(chat.user.id);
-            return { userId: chat.user.id, count };
+        // Configurar listeners en tiempo real para la patiracha de cada usuario
+        const listeners = chatData
+          .filter((chat) => !chat.isGroup && chat.user && chat.user.id)
+          .map((chat) => {
+            const userChatsRef = doc(db, "userchats", chat.user.id);
+
+            return onSnapshot(userChatsRef, (snapshot) => {
+              if (snapshot.exists()) {
+                const chats = snapshot.data().chats || [];
+                const friendCount = chats.filter((c) => !c.isGroup).length;
+
+                setPatirachaCounts((prev) => ({
+                  ...prev,
+                  [chat.user.id]: Math.min(friendCount, 9), // Limitar a un máximo de 9
+                }));
+              } else {
+                setPatirachaCounts((prev) => ({
+                  ...prev,
+                  [chat.user.id]: 0,
+                }));
+              }
+            });
           });
 
-        const counts = await Promise.all(friendPromises);
-        const countsObj = {};
-        counts.forEach(({ userId, count }) => {
-          countsObj[userId] = count;
-        });
-        setPatirachaCounts(countsObj);
-      }
-    );
+        // Limpiar listeners al desmontar
+        return () => {
+          listeners.forEach((unSub) => unSub());
+        };
+      });
 
-    return () => {
-      unSub();
-    };
+      return () => {
+        unSub();
+      };
+    }
   }, [currentUser.id]);
 
   const handleSelect = async (chat) => {
