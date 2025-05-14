@@ -22,6 +22,7 @@ function ChatList() {
   const [chats, setChats] = useState([]);
   const [groupMode, setGroupMode] = useState(false);
   const [patirachaCounts, setPatirachaCounts] = useState({}); // Nuevo estado
+  const [liveUsers, setLiveUsers] = useState({});
 
   const { currentUser, friendsCount, fetchFriendsCount } = useUserStore();
   const { chatId, changeChat } = useChatStore();
@@ -99,6 +100,34 @@ function ChatList() {
       };
     }
   }, [currentUser.id]);
+  useEffect(() => {
+    const unsubscribes = [];
+
+    // Nos aseguramos de que ya hay chats cargados
+    if (chats.length > 0) {
+      chats.forEach((chat) => {
+        if (!chat.isGroup && chat.user?.id) {
+          const unSub = onSnapshot(
+            doc(db, "users", chat.user.id),
+            (docSnap) => {
+              if (docSnap.exists()) {
+                const userData = docSnap.data();
+                setLiveUsers((prev) => ({
+                  ...prev,
+                  [chat.user.id]: userData.isActive,
+                }));
+              }
+            }
+          );
+          unsubscribes.push(unSub);
+        }
+      });
+    }
+
+    return () => {
+      unsubscribes.forEach((unsub) => unsub());
+    };
+  }, [chats]);
 
   const handleSelect = async (chat) => {
     const userChats = chats.map((item) => {
@@ -202,7 +231,7 @@ function ChatList() {
               alt=""
               className={
                 !chat.isGroup
-                  ? chat.user.isActive
+                  ? liveUsers[chat.user.id]
                     ? "active-border"
                     : "inactive-border"
                   : ""
