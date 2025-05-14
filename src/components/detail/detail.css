@@ -1,6 +1,10 @@
 .detail {
   flex: 1;
   background-color: rgb(102, 116, 103, 0.7);
+  padding: 20px; /* Asegura un espacio interno */
+  max-width: 400px; /* Define un ancho máximo */
+  margin: 0 auto; /* Centra el contenedor */
+  overflow: hidden; /* Evita que el contenido se desborde */
   .user {
     padding: 30px 20px;
     display: flex;
@@ -22,6 +26,12 @@
     display: flex;
     flex-direction: column;
     gap: 25px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    max-width: 100%; /* Asegúrate de que no exceda el ancho del contenedor */
+    overflow: hidden; /* Evita desbordamientos */
 
     .option {
       .title {
@@ -94,9 +104,88 @@
 
       &.logout {
         padding: 10px;
-        background-color: #353F34;
+        background-color: #353f34;
       }
-    
+    }
+
+    .tasks-section {
+      color: rgb(0, 0, 0);
+      padding: 15px;
+      background: #c1d9c1;
+      border-radius: 8px;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+   
+
+      .tasks-section h4 {
+        margin-bottom: 10px;
+        font-size: 16px;
+        color: #333;
+      }
+
+      #task-list {
+        list-style: none;
+        padding: 0;
+        max-height: 150px;
+        overflow-y: auto;
+      }
+
+      #task-list li {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #fff;
+        padding: 8px;
+        border-radius: 5px;
+        margin-bottom: 5px;
+        font-size: 14px;
+        transition: all 0.3s;
+      }
+
+      #task-list li span {
+        flex-grow: 1;
+      }
+
+      .complete-btn {
+        background: #4caf50;
+        color: white;
+        border: none;
+        padding: 4px 8px;
+        cursor: pointer;
+        border-radius: 4px;
+        font-size: 12px;
+      }
+
+      .complete-btn:hover {
+        background: #45a049;
+      }
+
+      .task-input {
+        display: flex;
+        margin-top: 10px;
+      }
+
+      .task-input input {
+        flex-grow: 1;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 14px;
+      }
+
+      .task-input button {
+        padding: 8px 10px;
+        background: #667467;
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+        margin-left: 5px;
+      }
+
+      .task-input button:hover {
+        background: #8db090;
+      }
+      
     }
   }
 }
