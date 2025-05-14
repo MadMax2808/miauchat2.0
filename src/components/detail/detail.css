@@ -197,6 +197,11 @@
       .delete-btn:hover {
         background-color: darkred;
       }
+
+      .completed-text {
+  color: #27ae60; /* Verde */
+  font-weight: bold;
+}
     }
   }
 }

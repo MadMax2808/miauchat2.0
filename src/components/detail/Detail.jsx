@@ -7,14 +7,23 @@ import { doc, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
 import { db } from "../../lib/firebase";
 import { onSnapshot } from "firebase/firestore";
 
+// Función para obtener la cantidad de amigos de un usuario
+async function getFriendsCount(userId) {
+  const userChatsRef = doc(db, "userchats", userId);
+  const userChatsSnap = await getDoc(userChatsRef);
+  if (!userChatsSnap.exists()) return 0;
+  const chats = userChatsSnap.data().chats || [];
+  return chats.filter(chat => !chat.isGroup).length;
+}
+
 const Detail = () => {
-  const { chatId, user, isCurrentUserBlocked, isReceiverBlocked } =
-    useChatStore();
+  const { chatId, user, isCurrentUserBlocked, isReceiverBlocked } = useChatStore();
   const { currentUser } = useUserStore();
 
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState("");
   const [isGroup, setIsGroup] = useState(false);
+  const [patiracha, setPatiracha] = useState(0);
 
   useEffect(() => {
     const fetchChatData = async () => {
@@ -31,6 +40,19 @@ const Detail = () => {
     fetchChatData();
   }, [chatId]);
 
+  // Obtener la patiracha del usuario (solo si no es grupo)
+  useEffect(() => {
+    const fetchPatiracha = async () => {
+      if (user?.id && !isGroup) {
+        const count = await getFriendsCount(user.id);
+        setPatiracha(Math.min(count, 9));
+      } else {
+        setPatiracha(0);
+      }
+    };
+    fetchPatiracha();
+  }, [user, isGroup]);
+
   useEffect(() => {
     if (isGroup && chatId) {
       const chatDocRef = doc(db, "chats", chatId);
@@ -41,7 +63,7 @@ const Detail = () => {
         }
       });
 
-      return () => unsubscribe(); // limpiar el listener al desmontar
+      return () => unsubscribe();
     }
   }, [chatId, isGroup]);
 
@@ -110,7 +132,17 @@ const Detail = () => {
     <div className="detail">
       <div className="user">
         <img src={user?.avatar || "./avatar.png"} alt="" />
-        <h2>{user?.username}</h2>
+        <h2>
+          {user?.username}
+          {/* Mostrar patiracha solo si NO es grupo y tiene amigos */}
+          {!isGroup && patiracha > 0 && (
+            <img
+              src={`./PatiRacha/72px (${patiracha}).png`}
+              alt={`Patiracha ${patiracha}`}
+              style={{ width: 32, height: 32, marginLeft: 8, verticalAlign: "middle" }}
+            />
+          )}
+        </h2>
         <p>En linea?</p>
       </div>
 
