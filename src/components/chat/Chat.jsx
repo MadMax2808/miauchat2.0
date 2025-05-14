@@ -54,9 +54,11 @@ const Chat = () => {
   // Obtener la patiracha del usuario con el que chateas
   useEffect(() => {
     const fetchPatiracha = async () => {
-      if (user?.id) {
+      if (user?.id && !user.isGroup) { // Solo si NO es grupo
         const count = await getFriendsCount(user.id);
         setPatiracha(Math.min(count, 9));
+      } else {
+        setPatiracha(0); // No mostrar patiracha para grupos
       }
     };
     fetchPatiracha();
@@ -150,7 +152,8 @@ const Chat = () => {
           <div className="texts">
             <span>
               {user.username}
-              {patiracha > 0 && (
+              {/* Solo mostrar patiracha si NO es grupo */}
+              {!user.isGroup && patiracha > 0 && (
                 <img
                   src={`./PatiRacha/72px (${patiracha}).png`}
                   alt={`Patiracha ${patiracha}`}
