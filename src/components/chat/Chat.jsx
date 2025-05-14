@@ -27,6 +27,7 @@ async function getFriendsCount(userId) {
 const Chat = () => {
   const [encryptionEnabled, setEncryptionEnabled] = useState(false);
   const [isActive, setIsActive] = useState(false);
+  const [isGroup, setIsGroup] = useState(false);
 
   const [chat, setChat] = useState();
   const [open, setOpen] = useState(false);
@@ -53,6 +54,22 @@ const Chat = () => {
     const bytes = CryptoJS.AES.decrypt(cipherText, secretKey);
     return bytes.toString(CryptoJS.enc.Utf8);
   };
+
+  useEffect(() => {
+    // Obtener si el chat es un grupo desde Firestore
+    const fetchChatData = async () => {
+      if (chatId) {
+        const chatDocRef = doc(db, "chats", chatId);
+        const chatDoc = await getDoc(chatDocRef);
+
+        if (chatDoc.exists()) {
+          setIsGroup(chatDoc.data().isGroup || false);
+        }
+      }
+    };
+
+    fetchChatData();
+  }, [chatId]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -225,7 +242,7 @@ const Chat = () => {
             <span>
               {user.username}
               {/* Solo mostrar patiracha si NO es grupo */}
-              {!user.isGroup && patiracha > 0 && (
+              {patiracha > 0 && (
                 <img
                   src={`./PatiRacha/72px (${patiracha}).png`}
                   alt={`Patiracha ${patiracha}`}
@@ -238,9 +255,11 @@ const Chat = () => {
                 />
               )}
             </span>
-            <p style={{ color: isActive ? "green" : "Red" }}>
-              {!user.isGroup ? (isActive ? "En línea" : "Desconectado") : ""}
-            </p>
+            {!isGroup && (
+              <p style={{ color: isActive ? "#83c781" : "rgb(184, 93, 93)" }}>
+                {isActive ? "En línea" : "Desconectado"}
+              </p>
+            )}
           </div>
         </div>
         <div className="icons">
@@ -280,7 +299,7 @@ const Chat = () => {
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{
-                      color: "#4285F4",
+                      color: "#83c781",
                       textDecoration: "underline",
                       display: "flex",
                       alignItems: "center",
@@ -289,13 +308,15 @@ const Chat = () => {
                   >
                     <FontAwesomeIcon
                       icon={faLocationDot}
-                      style={{ color: "#4285F4" }}
+                      style={{ color: "#83c781" }}
                     />
                     Ver ubicación en Google Maps
                   </a>
-                ) : message.encrypted
-                ? decryptText(message.text)
-                : message.text}
+                ) : message.encrypted ? (
+                  decryptText(message.text)
+                ) : (
+                  message.text
+                )}
               </p>
 
               <span className="message-date">
@@ -343,7 +364,10 @@ const Chat = () => {
             onClick={handleSendLocation}
             style={{ background: "none", border: "none", cursor: "pointer" }}
           >
-            <FontAwesomeIcon icon={faLocationDot} style={{ color: "#FFFFFF" }} />
+            <FontAwesomeIcon
+              icon={faLocationDot}
+              style={{ color: "#FFFFFF" }}
+            />
           </button>
         </div>
         <input

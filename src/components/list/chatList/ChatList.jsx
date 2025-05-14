@@ -14,7 +14,7 @@ async function getFriendsCount(userId) {
   const userChatsSnap = await getDoc(userChatsRef);
   if (!userChatsSnap.exists()) return 0;
   const chats = userChatsSnap.data().chats || [];
-  return chats.filter(chat => !chat.isGroup).length;
+  return chats.filter((chat) => !chat.isGroup).length;
 }
 
 function ChatList() {
@@ -34,82 +34,82 @@ function ChatList() {
 
   useEffect(() => {
     if (currentUser?.id) {
-      const unSub = onSnapshot(doc(db, "userchats", currentUser.id), async (res) => {
-        const items = res.data().chats;
+      const unSub = onSnapshot(
+        doc(db, "userchats", currentUser.id),
+        async (res) => {
+          const items = res.data().chats;
 
-        const promises = items.map(async (item) => {
-          if (item.isGroup) {
-            const groupDoc = await getDoc(doc(db, "groups", item.groupId));
-            const groupData = groupDoc.exists() ? groupDoc.data() : null;
+          const promises = items.map(async (item) => {
+            if (item.isGroup) {
+              const groupDoc = await getDoc(doc(db, "groups", item.groupId));
+              const groupData = groupDoc.exists() ? groupDoc.data() : null;
 
-            return {
-              ...item,
-              user: groupData
-                ? {
-                    username: groupData.name,
-                    avatar: "/group.png",
-                  }
-                : {
-                    username: "Grupo desconocido",
-                    avatar: "/group.png",
-                  },
-            };
-          } else {
-            const userDoc = await getDoc(doc(db, "users", item.receiverId));
-            const userData = userDoc.exists() ? userDoc.data() : null;
+              return {
+                ...item,
+                user: groupData
+                  ? {
+                      username: groupData.name,
+                      avatar: "/group.png",
+                    }
+                  : {
+                      username: "Grupo desconocido",
+                      avatar: "/group.png",
+                    },
+              };
+            } else {
+              const userDoc = await getDoc(doc(db, "users", item.receiverId));
+              const userData = userDoc.exists() ? userDoc.data() : null;
 
-            return {
-              ...item,
-              user: userData
-                ? userData
-                : {
-                    username: "Usuario eliminado",
-                    avatar: "/avatar.png",
-                  },
-            };
-          }
-        });
-
-        const chatData = await Promise.all(promises);
-
-        setChats(chatData.sort((a, b) => b.updatedAt - a.updatedAt));
-
-        // Configurar listeners en tiempo real para la patiracha de cada usuario
-        const listeners = chatData
-          .filter((chat) => !chat.isGroup && chat.user && chat.user.id)
-          .map((chat) => {
-            const userChatsRef = doc(db, "userchats", chat.user.id);
-
-            return onSnapshot(userChatsRef, (snapshot) => {
-              if (snapshot.exists()) {
-                const chats = snapshot.data().chats || [];
-                const friendCount = chats.filter((c) => !c.isGroup).length;
-
-                setPatirachaCounts((prev) => ({
-                  ...prev,
-                  [chat.user.id]: Math.min(friendCount, 9), // Limitar a un máximo de 9
-                }));
-              } else {
-                setPatirachaCounts((prev) => ({
-                  ...prev,
-                  [chat.user.id]: 0,
-                }));
-              }
-            });
+              return {
+                ...item,
+                user: userData
+                  ? userData
+                  : {
+                      username: "Usuario eliminado",
+                      avatar: "/avatar.png",
+                    },
+              };
+            }
           });
 
-        // Limpiar listeners al desmontar
-        return () => {
-          listeners.forEach((unSub) => unSub());
-        };
-      });
+          const chatData = await Promise.all(promises);
+
+          setChats(chatData.sort((a, b) => b.updatedAt - a.updatedAt));
+
+          // Configurar listeners en tiempo real para el estado de actividad de cada usuario
+          const listeners = chatData
+            .filter((chat) => !chat.isGroup && chat.user && chat.user.id)
+            .map((chat) => {
+              const userDocRef = doc(db, "users", chat.user.id);
+
+              return onSnapshot(userDocRef, (snapshot) => {
+                if (snapshot.exists()) {
+                  const isActive = snapshot.data().isActive;
+
+                  setChats((prevChats) =>
+                    prevChats.map((prevChat) =>
+                      prevChat.user.id === chat.user.id
+                        ? { ...prevChat, user: { ...prevChat.user, isActive } }
+                        : prevChat
+                    )
+                  );
+                }
+              });
+            });
+
+          // Limpiar listeners al desmontar
+          return () => {
+            listeners.forEach((unSub) => unSub());
+          };
+        }
+      );
 
       return () => {
         unSub();
       };
     }
   }, [currentUser.id]);
-
+  
   const handleSelect = async (chat) => {
     const userChats = chats.map((item) => {
       const { user, ...rest } = item;
@@ -166,7 +166,14 @@ function ChatList() {
         </div>
       </div>
 
-      <div style={{ color: "#fff", fontWeight: "bold", textAlign: "center", margin: "10px 0" }}>
+      <div
+        style={{
+          color: "#fff",
+          fontWeight: "bold",
+          textAlign: "center",
+          margin: "10px 0",
+        }}
+      >
         Amigos agregados: {friendsCount}
       </div>
 
@@ -179,8 +186,13 @@ function ChatList() {
             patirachaImg = (
               <img
                 src={`./PatiRacha/72px (${imgNum}).png`}
-                alt=''
-                style={{ width: 32, height: 32, marginLeft: 8, verticalAlign: "middle" }}
+                alt=""
+                style={{
+                  width: 32,
+                  height: 32,
+                  marginLeft: 8,
+                  verticalAlign: "middle",
+                }}
               />
             );
           }

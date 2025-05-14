@@ -104,11 +104,11 @@
     }
 
     img.active-border {
-      border: 3px solid #4caf50; /* Verde para activo */
+      border: 3px solid #83c781; 
     }
 
     img.inactive-border {
-      border: 3px solid #bb0000; /* Gris para inactivo */
+      border: 3px solid rgb(184, 93, 93); 
     }
 
     .texts {

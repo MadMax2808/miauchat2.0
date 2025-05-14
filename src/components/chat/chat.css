@@ -235,12 +235,13 @@
 .check-marks.seen {
   color: rgb(100, 158, 100); /* Color para mensajes vistos */
 }
+
 }
 
 .send-email-btn {
   margin-top: 10px;
   padding: 8px 12px;
-  background-color: #4caf50;
+  background-color: #83c781;
   color: white;
   border: none;
   border-radius: 6px;

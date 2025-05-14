@@ -210,7 +210,7 @@ console.log("Enviando correo a:", user.email);
         </h2>
         {/* Mostrar estado en línea solo si NO es grupo */}
         {!isGroup && (
-          <p style={{ color: isActive ? "green" : "Red" }}>
+          <p style={{ color: isActive ? "#83c781" : "rgb(184, 93, 93)" }}>
             {isActive ? "En línea" : "Desconectado"}
           </p>
         )}
@@ -243,7 +243,7 @@ console.log("Enviando correo a:", user.email);
                   )}
                   {task.completed && (
                     <button
-                      className="delete-btn"
+                      className="delete-btn" 
                       onClick={() => deleteTask(index)}
                     >
                       Eliminar

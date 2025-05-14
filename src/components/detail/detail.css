@@ -145,7 +145,8 @@
       }
 
       .complete-btn {
-        background: #4caf50;
+        background: #609a5e;
+
         color: white;
         border: none;
         padding: 4px 8px;
@@ -155,7 +156,7 @@
       }
 
       .complete-btn:hover {
-        background: #45a049;
+        background: rgb(89, 121, 91);
       }
 
       .task-input {
@@ -186,7 +187,7 @@
       }
       .delete-btn {
         margin-left: 10px;
-        background-color: red;
+        background-color:rgb(184, 93, 93);
         color: white;
         border: none;
         padding: 5px 10px;
@@ -199,9 +200,9 @@
       }
 
       .completed-text {
-  color: #27ae60; /* Verde */
-  font-weight: bold;
-}
+        color: #27ae60; /* Verde */
+        font-weight: bold;
+      }
     }
   }
 }
