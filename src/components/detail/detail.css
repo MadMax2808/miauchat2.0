@@ -114,7 +114,6 @@
       background: #c1d9c1;
       border-radius: 8px;
       box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-   
 
       .tasks-section h4 {
         margin-bottom: 10px;
@@ -185,7 +184,19 @@
       .task-input button:hover {
         background: #8db090;
       }
-      
+      .delete-btn {
+        margin-left: 10px;
+        background-color: red;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        cursor: pointer;
+        border-radius: 5px;
+      }
+
+      .delete-btn:hover {
+        background-color: darkred;
+      }
     }
   }
 }

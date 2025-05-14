@@ -3,10 +3,9 @@ import "./detail.css";
 import { auth } from "../../lib/firebase";
 import { useChatStore } from "../../lib/chatStore";
 import { useUserStore } from "../../lib/userStore";
-import { doc, getDoc, setDoc, updateDoc, arrayUnion } from "firebase/firestore";
+import { doc, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
 import { db } from "../../lib/firebase";
 import { onSnapshot } from "firebase/firestore";
-
 
 const Detail = () => {
   const { chatId, user, isCurrentUserBlocked, isReceiverBlocked } =
@@ -86,6 +85,27 @@ const Detail = () => {
     }
   };
 
+  const deleteTask = async (index) => {
+    if (isGroup && chatId) {
+      const taskToDelete = tasks[index];
+
+      const updatedTasks = tasks.filter((_, i) => i !== index);
+      setTasks(updatedTasks);
+
+      const chatDocRef = doc(db, "chats", chatId);
+      const chatDoc = await getDoc(chatDocRef);
+
+      if (chatDoc.exists()) {
+        const currentTasks = chatDoc.data().tasks || [];
+        const newTasks = currentTasks.filter(
+          (task) => task.text !== taskToDelete.text
+        );
+
+        await updateDoc(chatDocRef, { tasks: newTasks });
+      }
+    }
+  };
+
   return (
     <div className="detail">
       <div className="user">
@@ -117,6 +137,14 @@ const Detail = () => {
                       onClick={() => completeTask(index)}
                     >
                       Completar
+                    </button>
+                  )}
+                  {task.completed && (
+                    <button
+                      className="delete-btn"
+                      onClick={() => deleteTask(index)}
+                    >
+                      Eliminar
                     </button>
                   )}
                 </li>
