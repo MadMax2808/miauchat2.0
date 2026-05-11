@@ -24,10 +24,15 @@ export const storage = getStorage();
 export async function setUserActiveStatus(uid, isActive) {
   if (!uid) return;
   try {
-    await updateDoc(doc(db, "users", uid), {
-      isActive,
-      lastSeen: serverTimestamp(),
-    });
+
+    await setDoc(
+      doc(db, "users", uid),
+      {
+        isActive,
+        lastSeen: serverTimestamp(),
+      },
+      { merge: true },
+    );
   } catch (e) {
     console.error("Error actualizando estado de usuario:", e);
   }
