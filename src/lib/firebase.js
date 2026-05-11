@@ -2,7 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
-import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { doc, updateDoc, setDoc, serverTimestamp } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_API_KEY,
@@ -24,7 +24,7 @@ export const storage = getStorage();
 export async function setUserActiveStatus(uid, isActive) {
   if (!uid) return;
   try {
-
+    const userRef = doc(db, "users", uid);
     await setDoc(
       doc(db, "users", uid),
       {

@@ -1,27 +1,35 @@
-import { doc, getDoc } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
 import { create } from "zustand";
 import { db } from "./firebase";
 
 export const useUserStore = create((set) => ({
   currentUser: null,
   isLoading: true,
-  friendsCount: 0, // Nuevo estado
 
-  fetchUserInfo: async (uid) => {
+  fetchUserInfo: (uid) => {
     if (!uid) return set({ currentUser: null, isLoading: false });
 
     try {
       const docRef = doc(db, "users", uid);
-      const docSnap = await getDoc(docRef);
 
-      if (docSnap.exists()) {
-        set({ currentUser: docSnap.data(), isLoading: false });
-      } else {
-        set({ currentUser: null, isLoading: false });
-      }
+      // Usamos onSnapshot para escuchar cambios en tiempo real
+      return onSnapshot(docRef, (docSnap) => {
+        if (docSnap.exists()) {
+          set({
+            currentUser: {
+              blocked: [], // Fallback por si no existe el campo
+              ...docSnap.data(),
+              id: docSnap.id,
+            },
+            isLoading: false,
+          });
+        } else {
+          set({ currentUser: null, isLoading: false });
+        }
+      });
     } catch (err) {
       console.log(err);
-      return set({ currentUser: null, isLoading: false });
+      set({ currentUser: null, isLoading: false });
     }
   },
 
@@ -33,7 +41,7 @@ export const useUserStore = create((set) => ({
       const userChatsSnap = await getDoc(userChatsRef);
       if (!userChatsSnap.exists()) return set({ friendsCount: 0 });
       const chats = userChatsSnap.data().chats || [];
-      const count = chats.filter(chat => !chat.isGroup).length;
+      const count = chats.filter((chat) => !chat.isGroup).length;
       set({ friendsCount: count });
     } catch (err) {
       console.log(err);

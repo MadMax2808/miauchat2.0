@@ -35,7 +35,7 @@ const Userinfo = () => {
       return () => unsubscribe(); // Limpiar el listener al desmontar
     }
   }, [currentUser]);
-
+console.log("Datos del usuario actual:", currentUser);
   return (
     <div className="userInfo">
       <div className="user">

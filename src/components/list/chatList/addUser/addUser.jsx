@@ -31,7 +31,8 @@ const AddUser = () => {
       const q = query(userRef, where("username", "==", username));
       const querySnapshot = await getDocs(q);
       if (!querySnapshot.empty) {
-        setUser(querySnapshot.docs[0].data());
+        const userDoc = querySnapshot.docs[0];
+        setUser({ ...userDoc.data(), id: userDoc.id });
       }
     } catch (error) {
       console.log("No se encontro al usuario:", error);
@@ -66,23 +67,31 @@ const AddUser = () => {
         messages: [],
       });
 
-      await updateDoc(doc(db, "userchats", user.id), {
-        chats: arrayUnion({
-          chatId: newChatRef.id,
-          lastMessage: "",
-          receiverId: currentUser.id,
-          updatedAt: Date.now(),
-        }),
-      });
+      await setDoc(
+        doc(db, "userchats", user.id),
+        {
+          chats: arrayUnion({
+            chatId: newChatRef.id,
+            lastMessage: "",
+            receiverId: currentUser.id,
+            updatedAt: Date.now(),
+          }),
+        },
+        { merge: true },
+      );
 
-      await updateDoc(doc(db, "userchats", currentUser.id), {
-        chats: arrayUnion({
-          chatId: newChatRef.id,
-          lastMessage: "",
-          receiverId: user.id,
-          updatedAt: Date.now(),
-        }),
-      });
+      await setDoc(
+        doc(db, "userchats", currentUser.id),
+        {
+          chats: arrayUnion({
+            chatId: newChatRef.id,
+            lastMessage: "",
+            receiverId: user.id,
+            updatedAt: Date.now(),
+          }),
+        },
+        { merge: true },
+      );
 
       alert("Usuario agregado exitosamente");
       setUser(null);
