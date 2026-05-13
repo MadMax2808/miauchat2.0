@@ -12,7 +12,7 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background: rgba(53, 63, 52, 0.2); 
+    background: rgba(53, 63, 52, 0.2);
     border-radius: 10px;
 
     &:hover {
@@ -28,7 +28,8 @@
 
     .searchBar {
       flex: 1;
-      background-color: rgba(53, 63, 52, 0.5);
+      background-color: rgba(53, 63, 52, 0.4);
+      backdrop-filter: blur(10px);
       display: flex;
       align-items: center;
       gap: 20px;
@@ -41,6 +42,9 @@
         outline: none;
         color: rgb(255, 255, 255);
         flex: 1;
+      }
+      input::placeholder {
+        color: rgba(255, 255, 255, 0.4);
       }
 
       img {
@@ -73,7 +77,9 @@
         }
 
         &.active {
-          background-color: #3d4b3e;
+          background-color: #83c781;
+          box-shadow: 0 0 15px rgba(131, 199, 129, 0.5);
+          color: #1a241b;
         }
       }
     }
@@ -95,6 +101,7 @@
     padding: 20px;
     cursor: pointer;
     border-bottom: 1px solid #dddddd35;
+    transition: all 0.3s ease;
 
     img {
       width: 50px;
@@ -104,11 +111,21 @@
     }
 
     img.active-border {
-      border: 3px solid #83c781; 
+      border: 3px solid #83c781;
     }
 
     img.inactive-border {
-      border: 3px solid rgb(184, 93, 93); 
+      border: 3px solid rgb(184, 93, 93);
+    }
+
+    .active-chat {
+      background-color: rgba(131, 199, 129, 0.15) !important;
+      border-left: 4px solid #83c781;
+      backdrop-filter: blur(5px);
+    }
+    .active-chat .texts span {
+      color: #83c781;
+      text-shadow: 0 0 8px rgba(131, 199, 129, 0.4);
     }
 
     .texts {
@@ -117,7 +134,8 @@
       gap: 10px;
 
       span {
-        font-weight: 500;
+        font-size: 16px;
+        letter-spacing: 0.5px;
       }
 
       p {
@@ -125,5 +143,20 @@
         font-weight: 300;
       }
     }
+  }
+}
+.addUser,
+.addGroup {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

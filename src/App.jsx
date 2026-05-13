@@ -17,7 +17,7 @@ const App = () => {
     let lastUid = null;
     const unSub = onAuthStateChanged(auth, (user) => {
       fetchUserInfo(user?.uid);
-      if (user?.uid) {
+      if (user?.uid) { 
         setUserActiveStatus(user.uid, true); // Activo al iniciar sesión
         lastUid = user.uid;
       } else if (lastUid) {

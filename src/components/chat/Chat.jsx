@@ -38,7 +38,7 @@ const Chat = () => {
     file: null,
     url: "",
   });
-  const [patiracha, setPatiracha] = useState(0); // Estado para la patiracha
+  const [patiracha, setPatiracha] = useState(0); const [isSending, setIsSending] = useState(false);
 
   const { currentUser } = useUserStore();
   const { chatId, user } = useChatStore();
@@ -46,7 +46,7 @@ const Chat = () => {
   const endRef = useRef(null);
 
   //DESENCRYPTAR MENSAJES
-  const secretKey = "PatiRacha"; // Idealmente deberías guardarla más segura
+  const secretKey = "PatiRacha";
 
   const encryptText = (text) => {
     return CryptoJS.AES.encrypt(text, secretKey).toString();
@@ -56,9 +56,8 @@ const Chat = () => {
     const bytes = CryptoJS.AES.decrypt(cipherText, secretKey);
     return bytes.toString(CryptoJS.enc.Utf8);
   };
-  const [otraPatiracha, setOtraPatiracha] = useState(0); // Estado para la otra patiracha
+  const [otraPatiracha, setOtraPatiracha] = useState(0);
 
-  // Calcular la otra patiracha basada en el currentUser
   useEffect(() => {
     if (currentUser?.id) {
       const userDocRef = doc(db, "users", currentUser.id);
@@ -83,7 +82,6 @@ const Chat = () => {
   }, [currentUser]);
 
   useEffect(() => {
-    // Obtener si el chat es un grupo desde Firestore
     const fetchChatData = async () => {
       if (chatId) {
         const chatDocRef = doc(db, "chats", chatId);
@@ -112,7 +110,6 @@ const Chat = () => {
     };
   }, [chatId]);
 
-  // Obtener la patiracha del usuario con el que chateas
   useEffect(() => {
     if (user?.id && !user.isGroup) {
       // Solo si NO es grupo
@@ -136,7 +133,6 @@ const Chat = () => {
     }
   }, [user]);
 
-  // Escuchar el estado de actividad del usuario con el que chateas
   useEffect(() => {
     if (user?.id && !user.isGroup) {
       const userDocRef = doc(db, "users", user.id);
@@ -156,14 +152,14 @@ const Chat = () => {
   useEffect(() => {
     if (chatId && chat?.messages) {
       const unseenMessages = chat.messages.filter(
-        (message) => message.senderId !== currentUser.id && !message.isSeen
+        (message) => message.senderId !== currentUser.id && !message.isSeen,
       );
 
       if (unseenMessages.length > 0) {
         const updatedMessages = chat.messages.map((message) =>
           message.senderId !== currentUser.id
             ? { ...message, isSeen: true }
-            : message
+            : message,
         );
 
         updateDoc(doc(db, "chats", chatId), {
@@ -174,11 +170,10 @@ const Chat = () => {
   }, [chatId, chat?.messages, currentUser.id]);
 
   const handleStartVideoCall = () => {
-    setIsVideoCallActive(true); // Activa la videollamada
+    setIsVideoCallActive(true);
   };
-
   const handleEndVideoCall = () => {
-    setIsVideoCallActive(false); // Finaliza la videollamada
+    setIsVideoCallActive(false);
   };
 
   const handleEmoji = (e) => {
@@ -253,7 +248,7 @@ const Chat = () => {
       },
       () => {
         alert("No se pudo obtener tu ubicación.");
-      }
+      },
     );
   };
 
@@ -430,7 +425,7 @@ const Chat = () => {
             </>
           )}
         </div>
-        
+
         <button className="sendButton" onClick={handleSend}>
           Enviar
         </button>

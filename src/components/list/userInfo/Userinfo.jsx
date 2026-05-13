@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import "./userInfo.css";
 import { useUserStore } from "../../../lib/userStore";
 import { doc, getDoc } from "firebase/firestore";
-import { db } from "../../../lib/firebase";
+import { db, auth } from "../../../lib/firebase";
 import { onSnapshot } from "firebase/firestore";
 
 // Función para obtener la cantidad de amigos de un usuario
@@ -17,6 +17,7 @@ async function getFriendsCount(userId) {
 const Userinfo = () => {
   const { currentUser } = useUserStore();
   const [patiracha, setPatiracha] = useState(0);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     if (currentUser?.id) {
@@ -28,14 +29,15 @@ const Userinfo = () => {
           const friendCount = chats.filter((chat) => !chat.isGroup).length;
           setPatiracha(Math.min(friendCount, 9)); // Limitar a un máximo de 9
         } else {
-          setPatiracha(0); // Si no hay datos, no mostrar patiracha
+          setPatiracha(0);
         }
       });
 
       return () => unsubscribe(); // Limpiar el listener al desmontar
     }
   }, [currentUser]);
-console.log("Datos del usuario actual:", currentUser);
+
+  console.log("Datos del usuario actual:", currentUser);
   return (
     <div className="userInfo">
       <div className="user">
@@ -57,9 +59,21 @@ console.log("Datos del usuario actual:", currentUser);
         </h2>
       </div>
       <div className="icons">
-        <img src="./more.png" alt="" />
-        <img src="./video.png" alt="" />
-        <img src="./edit.png" alt="" />
+        {/* Contenedor relativo para el menú */}
+        <div className="more-container">
+          <img
+            src="./more.png"
+            alt="más"
+            onClick={() => setOpen((prev) => !prev)}
+          />
+          {open && (
+            <div className="dropdown-menu">
+              <button onClick={() => auth.signOut()} className="logout-btn">
+                Cerrar Sesión
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

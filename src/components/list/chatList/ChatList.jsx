@@ -24,6 +24,8 @@ function ChatList() {
   const [patirachaCounts, setPatirachaCounts] = useState({}); // Nuevo estado
   const [liveUsers, setLiveUsers] = useState({});
 
+  const [input, setInput] = useState("");
+
   const { currentUser, friendsCount, fetchFriendsCount } = useUserStore();
   const { chatId, changeChat } = useChatStore();
 
@@ -92,7 +94,7 @@ function ChatList() {
           }
 
           setPatirachaCounts(newPatirachaCounts);
-        }
+        },
       );
 
       return () => {
@@ -117,7 +119,7 @@ function ChatList() {
                   [chat.user.id]: userData.isActive,
                 }));
               }
-            }
+            },
           );
           unsubscribes.push(unSub);
         }
@@ -136,7 +138,7 @@ function ChatList() {
     });
 
     const chatIndex = userChats.findIndex(
-      (item) => item.chatId === chat.chatId
+      (item) => item.chatId === chat.chatId,
     );
 
     userChats[chatIndex].isSeen = true;
@@ -153,12 +155,20 @@ function ChatList() {
     }
   };
 
+  const filteredChats = chats.filter((c) =>
+    (c.user.username || "").toLowerCase().includes(input.toLowerCase()),
+  );
+
   return (
     <div className="chatList">
       <div className="search">
         <div className="searchBar">
           <img src="/search.png" />
-          <input type="text" placeholder="Search" />
+          <input
+            type="text"
+            placeholder="Search"
+            onChange={(e) => setInput(e.target.value)}
+          />
         </div>
         <div className="actions">
           <button
@@ -195,8 +205,7 @@ function ChatList() {
       >
         Amigos agregados: {friendsCount}
       </div>
-
-      {chats.map((chat) => {
+      {filteredChats.map((chat) => {
         let patirachaImg = null;
         if (!chat.isGroup && chat.user && chat.user.id) {
           const count = patirachaCounts[chat.user.id] || 0;
@@ -219,11 +228,16 @@ function ChatList() {
 
         return (
           <div
-            className="item"
+            className={`item ${chat.chatId === chatId ? "active-chat" : ""}`}
             key={chat.chatId}
             onClick={() => handleSelect(chat)}
             style={{
-              backgroundColor: chat?.isSeen ? "transparent" : "#353F34",
+              backgroundColor:
+                chat.chatId === chatId
+                  ? "rgba(179, 217, 179, 0.2)"
+                  : chat?.isSeen
+                    ? "transparent"
+                    : "#353F34",
             }}
           >
             <img

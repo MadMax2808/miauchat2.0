@@ -15,6 +15,8 @@ import {
 import { useState } from "react";
 import { useUserStore } from "../../../../lib/userStore";
 import { toast } from "react-toastify";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSearch, faUsers, faPlus, faTrash, faUsersGear } from "@fortawesome/free-solid-svg-icons";
 
 const AddGroup = () => {
   const { currentUser } = useUserStore();
@@ -22,6 +24,7 @@ const AddGroup = () => {
   const [searchUsername, setSearchUsername] = useState("");
   const [foundUser, setFoundUser] = useState(null);
   const [members, setMembers] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -34,22 +37,16 @@ const AddGroup = () => {
 
       if (!querySnapshot.empty) {
         const userData = querySnapshot.docs[0].data();
-
-        if (
-          userData.id === currentUser.id ||
-          members.some((m) => m.id === userData.id)
-        ) {
-          toast.error("Este usuario ya está en el grupo o eres tú");
+        if (userData.id === currentUser.id || members.some((m) => m.id === userData.id)) {
+          toast.error("Este michi ya está en la lista o eres tú 🐾");
           return;
         }
-
         setFoundUser(userData);
       } else {
-        toast.error("Usuario no encontrado");
-        setFoundUser(null);
+        toast.error("Usuario no encontrado 🙀");
       }
     } catch (error) {
-      console.error("Error buscando usuario:", error);
+      console.error(error);
     }
   };
 
@@ -59,124 +56,120 @@ const AddGroup = () => {
     setSearchUsername("");
   };
 
+  const handleRemoveMember = (id) => {
+    setMembers((prev) => prev.filter((m) => m.id !== id));
+  };
+
   const handleCreateGroup = async () => {
-    if (!groupName.trim()) {
-      toast.error("El nombre del grupo es obligatorio");
-      return;
-    }
+    if (!groupName.trim()) return toast.error("¡El grupo necesita un nombre! 🐱");
+    if (members.length < 2) return toast.error("Agrega al menos a 2 amigos");
 
-    if (members.length < 2) {
-      toast.error("Debes agregar al menos 2 miembros además de ti");
-      return;
-    }
-
-    const groupDocRef = doc(collection(db, "groups"));
-    const groupId = groupDocRef.id;
-
-    const chatDocRef = doc(collection(db, "chats"));
-    const chatId = chatDocRef.id;
-
-    const memberIds = members.map((m) => m.id);
-    const allMemberIds = [currentUser.id, ...memberIds];
-
+    setLoading(true);
     try {
-      // 1. Crear grupo
+      const groupDocRef = doc(collection(db, "groups"));
+      const chatDocRef = doc(collection(db, "chats"));
+      
+      const allMemberIds = [currentUser.id, ...members.map((m) => m.id)];
+
       await setDoc(groupDocRef, {
-        id: groupId,
+        id: groupDocRef.id,
         name: groupName,
         createdAt: serverTimestamp(),
         members: allMemberIds,
+        admin: currentUser.id
       });
 
-      // 2. Crear chat del grupo
       await setDoc(chatDocRef, {
-        id: chatId,
-        groupId,
+        id: chatDocRef.id,
+        groupId: groupDocRef.id,
         isGroup: true,
         messages: [],
         createdAt: serverTimestamp(),
       });
 
-      // 3. Agregar el chat a los documentos de cada usuario
       await Promise.all(
         allMemberIds.map(async (userId) => {
           const userChatsRef = doc(db, "userchats", userId);
-          const userDoc = await getDoc(userChatsRef);
-
-          const chatData = {
-            chatId,
-            groupId,
-            isGroup: true,
-            lastMessage: "",
-            updatedAt: Date.now(),
-          };
-
-          if (userDoc.exists()) {
-            await updateDoc(userChatsRef, {
-              chats: arrayUnion(chatData),
-            });
-          } else {
-            await setDoc(userChatsRef, {
-              chats: [chatData],
-            });
-          }
+          await setDoc(userChatsRef, {
+            chats: arrayUnion({
+              chatId: chatDocRef.id,
+              groupId: groupDocRef.id,
+              isGroup: true,
+              lastMessage: "¡Nuevo grupo creado! 🐾",
+              updatedAt: Date.now(),
+            }),
+          }, { merge: true });
         })
       );
 
-      toast.success("Grupo y chat creados exitosamente");
+      toast.success("¡Manada creada con éxito! ✨");
       setGroupName("");
       setMembers([]);
     } catch (err) {
-      console.error("Error al crear grupo y chat:", err);
-      toast.error("No se pudo crear el grupo");
+      toast.error("Error al crear el grupo");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="addGroup">
+      <div className="header">
+        <FontAwesomeIcon icon={faUsersGear} className="main-icon" />
+        <h2>Nueva Manada</h2>
+      </div>
+
       <input
+        className="group-name-input"
         type="text"
-        placeholder="Nombre del grupo"
+        placeholder="Nombre del grupo..."
         value={groupName}
         onChange={(e) => setGroupName(e.target.value)}
       />
 
-      <form onSubmit={handleSearch}>
+      <form className="search-form" onSubmit={handleSearch}>
         <input
           type="text"
-          placeholder="Username"
+          placeholder="Buscar amigos por username..."
           value={searchUsername}
           onChange={(e) => setSearchUsername(e.target.value)}
         />
-        <button type="submit">Buscar</button>
+        <button type="submit"><FontAwesomeIcon icon={faSearch} /></button>
       </form>
 
       {foundUser && (
-        <div className="user">
+        <div className="user-found animate-pop">
           <div className="detail">
             <img src={foundUser.avatar || "./avatar.png"} alt="" />
             <span>{foundUser.username}</span>
           </div>
-          <button onClick={handleAddMember}>Agregar al grupo</button>
+          <button className="add-btn" onClick={handleAddMember}>
+            <FontAwesomeIcon icon={faPlus} />
+          </button>
         </div>
       )}
 
-      {members.length > 0 && (
-        <div style={{ marginTop: "20px" }}>
-          <h4>Miembros del grupo:</h4>
+      <div className="members-list">
+        <h4>Miembros seleccionados ({members.length}):</h4>
+        <div className="scroll-area">
           {members.map((m) => (
-            <div key={m.id} className="user">
+            <div key={m.id} className="member-item">
               <div className="detail">
                 <img src={m.avatar || "./avatar.png"} alt="" />
                 <span>{m.username}</span>
               </div>
+              <FontAwesomeIcon 
+                icon={faTrash} 
+                className="delete-icon" 
+                onClick={() => handleRemoveMember(m.id)} 
+              />
             </div>
           ))}
         </div>
-      )}
+      </div>
 
-      <button onClick={handleCreateGroup} style={{ marginTop: "20px" }}>
-        Crear Grupo
+      <button className="create-btn" onClick={handleCreateGroup} disabled={loading}>
+        {loading ? "Creando..." : "Crear Grupo"}
       </button>
     </div>
   );

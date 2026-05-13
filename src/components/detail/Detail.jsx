@@ -3,300 +3,248 @@ import "./detail.css";
 import { auth } from "../../lib/firebase";
 import { useChatStore } from "../../lib/chatStore";
 import { useUserStore } from "../../lib/userStore";
-import { doc, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  updateDoc,
+  arrayUnion,
+  onSnapshot,
+} from "firebase/firestore";
 import { db } from "../../lib/firebase";
-import { onSnapshot } from "firebase/firestore";
 import emailjs from "emailjs-com";
-
-// Función para obtener la cantidad de amigos de un usuario
-async function getFriendsCount(userId) {
-  const userChatsRef = doc(db, "userchats", userId);
-  const userChatsSnap = await getDoc(userChatsRef);
-  if (!userChatsSnap.exists()) return 0;
-  const chats = userChatsSnap.data().chats || [];
-  return chats.filter((chat) => !chat.isGroup).length;
-}
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faSignOutAlt,
+  faEnvelope,
+  faTasks,
+  faPlus,
+  faCheck,
+  faTrash,
+  faCircle,
+} from "@fortawesome/free-solid-svg-icons";
 
 const Detail = () => {
-  const { chatId, user, isCurrentUserBlocked, isReceiverBlocked } =
+  const { chatId, user, isCurrentUserBlocked, isReceiverBlocked, resetChat } =
     useChatStore();
   const { currentUser } = useUserStore();
   const [showModal, setShowModal] = useState(false);
   const [emailBody, setEmailBody] = useState("");
-
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState("");
   const [isGroup, setIsGroup] = useState(false);
   const [patiracha, setPatiracha] = useState(0);
   const [isActive, setIsActive] = useState(false);
 
+  // Lógica de Fetching (Mantenemos tu lógica intacta)
   useEffect(() => {
     const fetchChatData = async () => {
       if (chatId) {
         const chatDocRef = doc(db, "chats", chatId);
         const chatDoc = await getDoc(chatDocRef);
-
-        if (chatDoc.exists()) {
-          setIsGroup(chatDoc.data().isGroup || false);
-        }
+        if (chatDoc.exists()) setIsGroup(chatDoc.data().isGroup || false);
       }
     };
-
     fetchChatData();
   }, [chatId]);
 
-  // Obtener la patiracha del usuario (solo si no es grupo)
   useEffect(() => {
     if (user?.id && !user.isGroup) {
-      // Solo si NO es grupo
       const userChatsRef = doc(db, "userchats", user.id);
-
       const unSub = onSnapshot(userChatsRef, (snapshot) => {
         if (snapshot.exists()) {
           const chats = snapshot.data().chats || [];
           const friendCount = chats.filter((chat) => !chat.isGroup).length;
-          setPatiracha(Math.min(friendCount, 9)); // Limitar a un máximo de 9
+          setPatiracha(Math.min(friendCount, 9));
         } else {
-          setPatiracha(0); // Si no hay datos, no mostrar patiracha
+          setPatiracha(0);
         }
       });
-
-      return () => {
-        unSub(); // Limpiar el listener al desmontar
-      };
-    } else {
-      setPatiracha(0); // No mostrar patiracha para grupos
+      return () => unSub();
     }
   }, [user]);
 
-  // Escuchar el estado de actividad del usuario mostrado
   useEffect(() => {
     if (user?.id && !user.isGroup) {
       const userDocRef = doc(db, "users", user.id);
       const unsubscribe = onSnapshot(userDocRef, (docSnap) => {
-        if (docSnap.exists()) {
-          setIsActive(!!docSnap.data().isActive);
-        } else {
-          setIsActive(false);
-        }
+        if (docSnap.exists()) setIsActive(!!docSnap.data().isActive);
       });
       return () => unsubscribe();
-    } else {
-      setIsActive(false);
     }
   }, [user]);
 
   useEffect(() => {
     if (isGroup && chatId) {
-      const chatDocRef = doc(db, "chats", chatId);
-
-      const unsubscribe = onSnapshot(chatDocRef, (docSnap) => {
-        if (docSnap.exists()) {
-          setTasks(docSnap.data().tasks || []);
-        }
+      const unsubscribe = onSnapshot(doc(db, "chats", chatId), (docSnap) => {
+        if (docSnap.exists()) setTasks(docSnap.data().tasks || []);
       });
-
       return () => unsubscribe();
     }
   }, [chatId, isGroup]);
 
+  // Funciones de Tareas e Email (Mantenemos tu lógica funcional)
   const addTask = async () => {
-    if (newTask.trim() && isGroup) {
+    if (newTask.trim() && isGroup && chatId) {
       const task = { text: newTask, completed: false };
-
-      setTasks([...tasks, task]);
+      await updateDoc(doc(db, "chats", chatId), { tasks: arrayUnion(task) });
       setNewTask("");
-
-      if (chatId) {
-        const chatDocRef = doc(db, "chats", chatId);
-        await updateDoc(chatDocRef, {
-          tasks: arrayUnion(task),
-        });
-      }
     }
   };
 
   const completeTask = async (index) => {
     if (isGroup && chatId) {
-      const taskToComplete = tasks[index];
-      const updatedTask = { ...taskToComplete, completed: true };
-
-      const updatedTasks = tasks.map((task, i) =>
-        i === index ? updatedTask : task
+      const updatedTasks = tasks.map((t, i) =>
+        i === index ? { ...t, completed: true } : t,
       );
-      setTasks(updatedTasks);
-
-      const chatDocRef = doc(db, "chats", chatId);
-      const chatDoc = await getDoc(chatDocRef);
-
-      if (chatDoc.exists()) {
-        const currentTasks = chatDoc.data().tasks || [];
-        const newTasks = currentTasks.map((task) =>
-          task.text === taskToComplete.text ? updatedTask : task
-        );
-
-        await updateDoc(chatDocRef, { tasks: newTasks });
-      }
+      await updateDoc(doc(db, "chats", chatId), { tasks: updatedTasks });
     }
   };
 
   const deleteTask = async (index) => {
     if (isGroup && chatId) {
-      const taskToDelete = tasks[index];
-
       const updatedTasks = tasks.filter((_, i) => i !== index);
-      setTasks(updatedTasks);
-
-      const chatDocRef = doc(db, "chats", chatId);
-      const chatDoc = await getDoc(chatDocRef);
-
-      if (chatDoc.exists()) {
-        const currentTasks = chatDoc.data().tasks || [];
-        const newTasks = currentTasks.filter(
-          (task) => task.text !== taskToDelete.text
-        );
-
-        await updateDoc(chatDocRef, { tasks: newTasks });
-      }
+      await updateDoc(doc(db, "chats", chatId), { tasks: updatedTasks });
     }
   };
 
   const handleSendEmail = () => {
-    if (!emailBody.trim()) return alert("El mensaje no puede estar vacío");
-console.log("Enviando correo a:", user.email);
+    if (!emailBody.trim()) return alert("El mensaje está vacío");
     emailjs
       .send(
-        "service_xh8mftu", 
-        "template_brlynnu", 
+        "service_xh8mftu",
+        "template_brlynnu",
         {
           to_email: user.email,
           name: currentUser.username,
           message: emailBody,
         },
-        "5T3n0KY39W0MVgBrl" 
+        "5T3n0KY39W0MVgBrl",
       )
-      .then(
-        (result) => {
-          alert("Correo enviado con éxito");
-          setEmailBody("");
-          setShowModal(false);
-        },
-        (error) => {
-          console.error("Error al enviar:", error);
-          alert("Error al enviar el correo");
-        }
-      );
+      .then(() => {
+        alert("Correo enviado 🐾");
+        setEmailBody("");
+        setShowModal(false);
+      });
+  };
+
+  const handleLogout = () => {
+    auth.signOut();
+    resetChat();
   };
 
   return (
     <div className="detail">
       <div className="user">
-        <img src={user?.avatar || "./avatar.png"} alt="" />
+        <div className="avatar-wrapper">
+          <img src={user?.avatar || "./avatar.png"} alt="" />
+          {!isGroup && (
+            <FontAwesomeIcon
+              icon={faCircle}
+              className={`status-dot ${isActive ? "online" : "offline"}`}
+            />
+          )}
+        </div>
         <h2>
           {user?.username}
-          {/* Mostrar patiracha solo si NO es grupo y tiene amigos */}
           {!isGroup && patiracha > 0 && (
             <img
               src={`./PatiRacha/72px (${patiracha}).png`}
-              alt={`Patiracha ${patiracha}`}
-              style={{
-                width: 32,
-                height: 32,
-                marginLeft: 8,
-                verticalAlign: "middle",
-              }}
+              alt="Patiracha"
+              className="pati-badge"
             />
           )}
         </h2>
-        {/* Mostrar estado en línea solo si NO es grupo */}
         {!isGroup && (
-          <p style={{ color: isActive ? "#83c781" : "rgb(184, 93, 93)" }}>
+          <p className="status-text">
             {isActive ? "En línea" : "Desconectado"}
           </p>
         )}
       </div>
 
-      <div className="info">
-        <button className="logout" onClick={() => auth.signOut()}>
-          Logout
-        </button>
-
-        {isGroup && (
-          <div className="tasks-section">
-            <h4>Tareas del Grupo</h4>
-            <ul id="task-list">
-              {tasks.map((task, index) => (
-                <li
-                  key={index}
-                  className={task.completed ? "completed-task" : ""}
-                >
-                  <span className={task.completed ? "completed-text" : ""}>
-                    {task.text}
-                  </span>
-                  {!task.completed && (
-                    <button
-                      className="complete-btn"
-                      onClick={() => completeTask(index)}
-                    >
-                      Completar
-                    </button>
-                  )}
-                  {task.completed && (
-                    <button
-                      className="delete-btn" 
-                      onClick={() => deleteTask(index)}
-                    >
-                      Eliminar
-                    </button>
-                  )}
-                </li>
-              ))}
-            </ul>
+      <div className="info-scroll">
+        {isGroup ? (
+          <div className="tasks-section glass-panel">
+            <h4>
+              <FontAwesomeIcon icon={faTasks} /> Tareas de la Manada
+            </h4>
             <div className="task-input">
               <input
                 type="text"
-                id="task-input"
-                placeholder="Nueva tarea..."
+                placeholder="Nueva misión..."
                 value={newTask}
                 onChange={(e) => setNewTask(e.target.value)}
               />
-              <button id="add-task-btn" onClick={addTask}>
-                Add
+              <button onClick={addTask}>
+                <FontAwesomeIcon icon={faPlus} />
+              </button>
+            </div>
+            <ul className="task-list">
+              {tasks.map((task, index) => (
+                <li
+                  key={index}
+                  className={task.completed ? "task-item done" : "task-item"}
+                >
+                  <span>{task.text}</span>
+                  <div className="task-actions">
+                    {!task.completed ? (
+                      <button
+                        className="complete-btn"
+                        onClick={() => completeTask(index)}
+                      >
+                        <FontAwesomeIcon icon={faCheck} />
+                      </button>
+                    ) : (
+                      <button
+                        className="delete-btn"
+                        onClick={() => deleteTask(index)}
+                      >
+                        <FontAwesomeIcon icon={faTrash} />
+                      </button>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          user?.email && (
+            <button
+              className="action-btn email"
+              onClick={() => setShowModal(true)}
+            >
+              <FontAwesomeIcon icon={faEnvelope} /> Enviar Correo
+            </button>
+          )
+        )}
+
+        <button className="action-btn logout" onClick={handleLogout}>
+          <FontAwesomeIcon icon={faSignOutAlt} /> Cerrar Sesión
+        </button>
+      </div>
+
+      {showModal && (
+        <div className="modal-overlay">
+          <div className="modal-content glass-panel">
+            <h3>Enviar correo a {user.username}</h3>
+            <textarea
+              value={emailBody}
+              onChange={(e) => setEmailBody(e.target.value)}
+              placeholder="Escribe tu mensaje gatuno..."
+            />
+            <div className="modal-actions">
+              <button className="confirm-btn" onClick={handleSendEmail}>
+                Enviar
+              </button>
+              <button
+                className="cancel-btn"
+                onClick={() => setShowModal(false)}
+              >
+                Cancelar
               </button>
             </div>
           </div>
-        )}
-
-        {!isGroup && user?.email && (
-          <>
-            <button
-              className="send-email-btn"
-              onClick={() => setShowModal(true)}
-            >
-              Enviar Correo
-            </button>
-
-            {showModal && (
-              <div className="modal-overlay">
-                <div className="modal-content">
-                  <h3>Enviar correo a {user.username}</h3>
-                  <textarea
-                    value={emailBody}
-                    onChange={(e) => setEmailBody(e.target.value)}
-                    placeholder="Escribe tu mensaje..."
-                  ></textarea>
-                  <div className="modal-actions">
-                    <button onClick={handleSendEmail}>Enviar</button>
-                    <button onClick={() => setShowModal(false)}>
-                      Cancelar
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

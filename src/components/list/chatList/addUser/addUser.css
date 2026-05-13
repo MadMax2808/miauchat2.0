@@ -1,64 +1,132 @@
 .addUser {
-  width: max-content;
+  width: 500px;
   height: max-content;
   padding: 30px;
-  background-color: rgb(53, 63, 52, 0.781);
-  border-radius: 10px;
+  background-color: rgba(53, 63, 52, 0.881);
+
+  backdrop-filter: blur(16px) saturate(180%);
+  border-radius: 15px;
+
   position: absolute;
   top: 0;
   bottom: 0;
   left: 0;
   right: 0;
   margin: auto;
+  z-index: 999;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+  animation: fadeIn 0.3s ease-out;
 
   form {
-    display: flex;
-    gap: 20px;
+    .search-input-wrapper {
+      display: flex;
+      gap: 15px;
 
-    input {
-      padding: 20px;
-      border-radius: 10px;
-      border: none;
-      outline: none;
-    }
+      input {
+        flex: 1;
+        padding: 15px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+        outline: none;
+        font-size: 16px;
 
-    button {
-      padding: 20px;
-      border-radius: 10px;
-      background-color: rgb(102, 116, 103);
-      color: white;
-      border: none;
-      cursor: pointer;
+        &:focus {
+          border-color: #83c781;
+          box-shadow: 0 0 10px rgba(131, 199, 129, 0.2);
+        }
+      }
+
+      button {
+        padding: 15px 20px;
+        border-radius: 10px;
+        background-color: #3d4b3e;
+        color: white;
+        border: 1px solid rgba(131, 199, 129, 0.3);
+        cursor: pointer;
+        transition: all 0.3s;
+
+        &:hover:not(:disabled) {
+          background-color: #83c781;
+          color: #1a241b;
+          box-shadow: 0 0 15px rgba(131, 199, 129, 0.4);
+        }
+
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+      }
     }
   }
 
-  .user {
-    margin-top: 50px;
+  .user-result {
+    margin-top: 40px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    animation: slideUp 0.4s ease-out;
 
     .detail {
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: 15px;
       background-color: transparent;
-
       img {
         width: 50px;
         height: 50px;
         border-radius: 50%;
         object-fit: cover;
+        border: 2px solid #83c781;
+      }
+
+      span {
+        font-weight: 600;
+        color: white;
+        font-size: 18px;
       }
     }
 
-    button {
-      padding: 10px;
-      border-radius: 10px;
-      background-color: rgb(102, 116, 103);
-      color: white;
+    .add-btn {
+      padding: 10px 15px;
+      border-radius: 8px;
+      background-color: #83c781;
+      color: #1a241b;
       border: none;
       cursor: pointer;
+      font-weight: 700;
+      transition: all 0.3s;
+
+      &:hover {
+        background-color: #9de29b;
+        transform: scale(1.05);
+        box-shadow: 0 0 15px rgba(131, 199, 129, 0.5);
+      }
     }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

@@ -11,12 +11,27 @@ import { auth, db } from "../../lib/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import upload from "../../lib/upload";
 
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
+
+const FIREBASE_ERRORS = {
+  "auth/email-already-in-use":
+    "¡Miau! Este correo ya tiene dueño. ¿Ya tienes cuenta?",
+  "auth/invalid-email": "Ese correo se ve medio raro, ¿está bien escrito?",
+  "auth/weak-password":
+    "Esa contraseña no aguanta ni un rasguño. ¡Ponle más de 6 caracteres!",
+  "auth/user-not-found": "No encontramos a ese michi. Revisa tu correo.",
+  "auth/wrong-password": "¡Contraseña incorrecta! Intenta de nuevo.",
+  "auth/invalid-credential": "Credenciales inválidas. Revisa tus datos.",
+};
+
 const Login = () => {
   const [avatar, setAvatar] = useState({
     file: null,
     url: "",
   });
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     if (e.target.files[0]) {
@@ -122,7 +137,9 @@ const Login = () => {
       toast.success("Inicio de sesión exitoso");
     } catch (err) {
       console.log(err);
-      toast.error("Error al iniciar sesión");
+      const message =
+        FIREBASE_ERRORS[err.code] || "Algo salió mal... intenta de nuevo.";
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -135,7 +152,29 @@ const Login = () => {
         <h2>¡Bienvenido a MiauApp!</h2>
         <form onSubmit={handleLogin}>
           <input type="text" placeholder="Email" name="email" />
-          <input type="password" placeholder="Password" name="password" />
+          <div
+            className="password-input-wrapper"
+            style={{ width: "100%", position: "relative" }}
+          >
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
+              name="password"
+              style={{ width: "100%" }}
+            />
+            <span
+              onClick={() => setShowPassword(!showPassword)}
+              style={{
+                position: "absolute",
+                right: "15px",
+                top: "15px",
+                cursor: "pointer",
+                color: "rgba(255, 255, 255, 0.7)",
+              }}
+            >
+              <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
+            </span>
+          </div>
           <button disabled={loading}>
             {loading ? "Cargando" : "Iniciar Sesión"}
           </button>
