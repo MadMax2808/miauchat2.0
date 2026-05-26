@@ -24,7 +24,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 const Detail = () => {
-  const { chatId, user, isCurrentUserBlocked, isReceiverBlocked, resetChat } =
+  const { chatId, user, isCurrentUserBlocked, isReceiverBlocked} =
     useChatStore();
   const { currentUser } = useUserStore();
   const [showModal, setShowModal] = useState(false);
@@ -127,11 +127,6 @@ const Detail = () => {
       });
   };
 
-  const handleLogout = () => {
-    auth.signOut();
-    resetChat();
-  };
-
   return (
     <div className="detail">
       <div className="user">
@@ -217,9 +212,7 @@ const Detail = () => {
           )
         )}
 
-        <button className="action-btn logout" onClick={handleLogout}>
-          <FontAwesomeIcon icon={faSignOutAlt} /> Cerrar Sesión
-        </button>
+     
       </div>
 
       {showModal && (

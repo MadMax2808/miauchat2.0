@@ -195,16 +195,6 @@ function ChatList() {
         </div>
       </div>
 
-      <div
-        style={{
-          color: "#fff",
-          fontWeight: "bold",
-          textAlign: "center",
-          margin: "10px 0",
-        }}
-      >
-        Amigos agregados: {friendsCount}
-      </div>
       {filteredChats.map((chat) => {
         let patirachaImg = null;
         if (!chat.isGroup && chat.user && chat.user.id) {

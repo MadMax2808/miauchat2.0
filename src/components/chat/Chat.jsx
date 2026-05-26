@@ -14,7 +14,13 @@ import {
 } from "firebase/firestore";
 import CryptoJS from "crypto-js";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faLocationDot } from "@fortawesome/free-solid-svg-icons";
+import {
+  faLocationDot,
+  faVideo,
+  faInfoCircle,
+  faImage,
+  faSmile,
+} from "@fortawesome/free-solid-svg-icons";
 import Videollamada from "../videollamada";
 
 async function getFriendsCount(userId) {
@@ -25,7 +31,7 @@ async function getFriendsCount(userId) {
   return chats.filter((chat) => !chat.isGroup).length;
 }
 
-const Chat = () => {
+const Chat = ({ setShowDetail, showDetail }) => {
   const [encryptionEnabled, setEncryptionEnabled] = useState(false);
   const [isActive, setIsActive] = useState(false);
   const [isGroup, setIsGroup] = useState(false);
@@ -38,7 +44,8 @@ const Chat = () => {
     file: null,
     url: "",
   });
-  const [patiracha, setPatiracha] = useState(0); const [isSending, setIsSending] = useState(false);
+  const [patiracha, setPatiracha] = useState(0);
+  const [isSending, setIsSending] = useState(false);
 
   const { currentUser } = useUserStore();
   const { chatId, user } = useChatStore();
@@ -264,14 +271,17 @@ const Chat = () => {
   };
 
   return (
-    <div className="chat">
+    <div
+      className="chat"
+      style={{ borderRadius: showDetail ? "0" : "0 20px 20px 0" }}
+    >
       <div className="top">
         <div className="user">
           <img src={user.avatar || "./avatar.png"} alt="" />
           <div className="texts">
             <span>
               {user.username}
-              {/* Solo mostrar patiracha si NO es grupo */}
+
               {patiracha > 0 && (
                 <img
                   src={`./PatiRacha/72px (${patiracha}).png`}
@@ -299,16 +309,30 @@ const Chat = () => {
             }`}
             onClick={() => setEncryptionEnabled((prev) => !prev)}
           >
-            {encryptionEnabled ? "🔒 Encriptado" : "🔓 Normal"}
+            {encryptionEnabled ? "🔒 Encriptado" : "🔓 Cifrado"}
           </button>
-
-          <img
-            src="./video.png"
-            alt="Iniciar videollamada"
+          <FontAwesomeIcon
+            icon={faVideo}
             onClick={handleStartVideoCall}
-            style={{ cursor: "pointer" }}
+            style={{
+              width: "22px",
+              height: "22px",
+              cursor: "pointer",
+              color: "rgba(255, 255, 255, 0.8)",
+            }}
+            title="Iniciar videollamada"
           />
-          <img src="./info.png" alt="" />
+          <FontAwesomeIcon
+            icon={faInfoCircle}
+            onClick={() => setShowDetail((prev) => !prev)}
+            style={{
+              width: "22px",
+              height: "22px",
+              cursor: "pointer",
+              color: "rgba(255, 255, 255, 0.8)",
+            }}
+            title="Detalles"
+          />
         </div>
       </div>
 
@@ -381,7 +405,10 @@ const Chat = () => {
         <div ref={endRef}></div>
       </div>
 
-      <div className="bottom">
+      <div
+        className="bottom"
+        style={{ borderRadius: showDetail ? "0" : "0 0 20px 0" }}
+      >
         <div className="icons">
           <label htmlFor="file">
             <img src="./img.png" alt="" />
