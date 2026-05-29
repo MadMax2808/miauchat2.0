@@ -1,52 +1,58 @@
-@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Fredoka:wght@400;600&family=Poppins:wght@400;600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Fredoka:wght@400;600&family=Poppins:wght@400;600&display=swap");
+
+:root {
+  --color-coral-accent: #f97077;
+  --color-blush-accent: #ffbfbf;
+  --color-soft-blush: #ffe1e1;
+  --color-pastel-sky: #d9e3f9;
+  --color-text-navy: #2b3a4a;
+
+  /* VARIABLES SEMÁNTICAS */
+  --bg-app-exterior: var(--color-pastel-sky);
+
+  --bg-glass-container: #d9e4ff8c;
+  --border-glass: rgba(255, 255, 255, 0.5);
+
+  --bg-input: rgba(255, 255, 255, 0.447);
+
+  --text-title: var(--color-text-navy);
+  --text-input: var(--color-text-navy);
+  --text-muted: rgba(43, 58, 74, 0.5);
+
+  --btn-bg: var(--color-coral-accent);
+  --btn-text: #ffffff;
+}
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Poppins', 'Fredoka', 'Comic Neue', sans-serif;
+  font-family: "Poppins", "Fredoka", "Comic Neue", sans-serif;
 }
 
 body {
-  background-image: url("/Fondo2.png");
+  background-image:
+    linear-gradient(rgba(89, 118, 149, 0.25), rgba(43, 58, 74, 0.25)),
+    url("/Fondos/New bg.png");
   display: flex;
   align-items: center;
   justify-content: center;
   height: 100vh;
-  color: white;
+  color: var(--text-title);
 }
 
 .container {
   width: 95vw;
   height: 90vh;
- padding: 20px;
-  background-color: rgba(193, 217, 193, 0.7);
-  backdrop-filter: blur(19px) saturate(180%);
+  background-color: var(--bg-glass-container);
+  backdrop-filter: blur(20px) saturate(150%);
   border-radius: 28px;
-  border: 1px solid rgba(255, 255, 255, 0.125);
+  border: 1px solid var(--border-glass);
   display: flex;
-}
-
-/* Estilos para pantallas pequeñas (teléfonos) */
-@media (max-width: 768px) {
-  body {
-    flex-direction: column;
-    justify-content: flex-start;
-    height: auto;
-  }
-
-   .container {
-    flex-direction: column; /* Cambia la dirección de los elementos dentro de .container a columna */
-    width: 100%;
-    height: auto;
-    margin: 0;
-    border-radius: 0;
-  }
-}
-
-/* Estilos para pantallas muy pequeñas (menos de 480px) */
-@media (max-width: 480px) {
-  body {
-    font-size: 14px; /* Ajusta el tamaño general de la fuente */
-  }
+  overflow: hidden;
+  
+  box-shadow:
+    0 15px 35px rgba(43, 58, 74, 0.25),
+    inset 0 1px 2px rgba(255, 255, 255, 0.8),
+    inset 0 -1px 2px rgba(255, 255, 255, 0.2);
 }

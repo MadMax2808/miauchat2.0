@@ -148,7 +148,7 @@ const Login = () => {
   return (
     <div className="login">
       <div className="item">
-        <img src="./Logo.png" alt="" />
+        <img src="./Logos/Logo-coral.png" alt="" />
         <h2>¡Bienvenido a MiauApp!</h2>
         <form onSubmit={handleLogin}>
           <input type="text" placeholder="Email" name="email" />
@@ -169,7 +169,7 @@ const Login = () => {
                 right: "15px",
                 top: "15px",
                 cursor: "pointer",
-                color: "rgba(255, 255, 255, 0.7)",
+                color: "rgba(255, 60, 60, 0.7)",
               }}
             >
               <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
@@ -182,11 +182,11 @@ const Login = () => {
       </div>
       <div className="separator"></div>
       <div className="item">
-        <img src="./Logo.png" alt="" />
+        <img src="./Logos/Logo-coral.png" alt="" />
         <h2>Crea una cuenta</h2>
         <form onSubmit={handleRegister}>
           <label htmlFor="file">
-            <img src={avatar.url || "./avatar.png"} alt="" />
+            <img src={avatar.url || "./Logos/Avatar.png"} alt="" />
             Subir foto de perfil
           </label>
           <input

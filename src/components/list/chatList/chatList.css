@@ -7,49 +7,59 @@
   }
 
   &::-webkit-scrollbar-track {
-    background: rgba(75, 94, 73, 0.05);
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 10px;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: rgba(53, 63, 52, 0.2);
+    background: rgba(249, 112, 119, 0.4);
     border-radius: 10px;
 
     &:hover {
-      background: rgba(255, 255, 255, 0.3);
+      background: var(--color-blush-accent);
     }
   }
 
   .search {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 15px;
     padding: 20px;
+
+    .search-icon {
+      font-size: 16px;
+      color: var(--text-muted);
+      opacity: 0.8;
+    }
 
     .searchBar {
       flex: 1;
-      background-color: rgba(53, 63, 52, 0.4);
+      background-color: var(--bg-input);
       backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 191, 191, 0.5);
+      box-shadow: inset 0 2px 5px rgba(43, 58, 74, 0.05);
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: 15px;
       border-radius: 20px;
-      padding: 10px;
+      padding: 10px 15px;
 
       input {
         background-color: transparent;
         border: none;
         outline: none;
-        color: rgb(255, 255, 255);
+        color: var(--text-input);
+
         flex: 1;
       }
       input::placeholder {
-        color: rgba(255, 255, 255, 0.4);
+        color: var(--text-muted);
       }
 
       img {
         width: 20px;
         height: 20px;
+        opacity: 0.7;
       }
     }
 
@@ -58,9 +68,9 @@
       gap: 10px;
 
       .action-button {
-        background-color: rgba(102, 116, 103, 0.8);
-        color: white;
-        border: none;
+        background-color: rgba(255, 255, 255, 0.5);
+        color: var(--text-title);
+        border: 2px solid rgba(255, 191, 191, 0.5);
         border-radius: 50%;
         padding: 10px;
         cursor: pointer;
@@ -68,41 +78,39 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: background-color 0.3s ease;
         width: 40px;
         height: 40px;
+        transition: all 0.3s ease;
 
         &:hover {
-          background-color: rgba(126, 141, 127, 0.9);
+          background-color: rgba(247, 212, 212, 0.8);
+          transform: translateY(-2px);
         }
 
         &.active {
-          background-color: #83c781;
-          box-shadow: 0 0 15px rgba(131, 199, 129, 0.5);
-          color: #1a241b;
+          background-color: var(--color-coral-accent);
+          box-shadow: 0 0 15px rgba(249, 112, 119, 0.5);
+          color: white;
         }
       }
-    }
-
-    .add {
-      width: 36px;
-      height: 36px;
-      background-color: rgba(53, 63, 52, 0.5);
-      padding: 10px;
-      border-radius: 10px;
-      cursor: pointer;
     }
   }
 
   .item {
     display: flex;
     align-items: center;
-    border-radius: 20px;
-    gap: 20px;
-    padding: 20px;
+    border-radius: 28px;
+    gap: 15px;
+    padding: 15px;
+    margin: 0 15px 10px 15px;
     cursor: pointer;
-    border-bottom: 1px solid #dddddd35;
     transition: all 0.3s ease;
+    border: 1px solid transparent;
+
+    &:hover {
+      background-color: rgba(250, 237, 237, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+    }
 
     img {
       width: 50px;
@@ -112,36 +120,39 @@
     }
 
     img.active-border {
-      border: 3px solid #83c781;
+      border: 3px solid var(--color-coral-accent);
     }
 
     img.inactive-border {
-      border: 3px solid rgb(184, 93, 93);
+      border: 3px solid rgba(43, 58, 74, 0.4);
     }
 
-    .active-chat {
-      background-color: rgba(131, 199, 129, 0.15) !important;
-      border-left: 4px solid #83c781;
+    &.active-chat {
+      background-color: rgba(249, 112, 119, 0.1) !important;
+      border-left: 4px solid var(--color-coral-accent);
       backdrop-filter: blur(5px);
     }
-    .active-chat .texts span {
-      color: #83c781;
-      text-shadow: 0 0 8px rgba(131, 199, 129, 0.4);
+    &.active-chat .texts span {
+      color: var(--color-coral-accent);
+      text-shadow: 0 0 8px rgba(249, 112, 119, 0.3);
     }
 
     .texts {
       display: flex;
       flex-direction: column;
       gap: 10px;
+      color: var(--text-title);
 
       span {
         font-size: 16px;
         letter-spacing: 0.5px;
+        font-weight: 600;
       }
 
       p {
         font-size: 14px;
         font-weight: 300;
+        color: var(--text-muted);
       }
     }
   }

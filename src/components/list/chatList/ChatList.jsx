@@ -6,7 +6,7 @@ import { doc, onSnapshot, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../lib/firebase";
 import { useChatStore } from "../../../lib/chatStore";
 import AddGroup from "./addGroup/addGroup";
-import { FaUserPlus, FaUsers, FaTimes } from "react-icons/fa";
+import { FaUserPlus, FaUsers, FaTimes, FaSearch } from "react-icons/fa";
 
 // Función para obtener la cantidad de amigos de un usuario
 async function getFriendsCount(userId) {
@@ -52,11 +52,11 @@ function ChatList() {
                 user: groupData
                   ? {
                       username: groupData.name,
-                      avatar: "/group.png",
+                      avatar: "/Logos/Group2.png",
                     }
                   : {
                       username: "Grupo desconocido",
-                      avatar: "/group.png",
+                      avatar: "/Logos/Group2.png",
                     },
               };
             } else {
@@ -69,7 +69,7 @@ function ChatList() {
                   ? userData
                   : {
                       username: "Usuario eliminado",
-                      avatar: "/avatar.png",
+                      avatar: "/Logos/avatar.png",
                     },
               };
             }
@@ -163,7 +163,7 @@ function ChatList() {
     <div className="chatList">
       <div className="search">
         <div className="searchBar">
-          <img src="/search.png" />
+          <FaSearch className="search-icon" />
           <input
             type="text"
             placeholder="Search"
@@ -221,17 +221,9 @@ function ChatList() {
             className={`item ${chat.chatId === chatId ? "active-chat" : ""}`}
             key={chat.chatId}
             onClick={() => handleSelect(chat)}
-            style={{
-              backgroundColor:
-                chat.chatId === chatId
-                  ? "rgba(179, 217, 179, 0.2)"
-                  : chat?.isSeen
-                    ? "transparent"
-                    : "#353F34",
-            }}
           >
             <img
-              src={chat.user.avatar || "./avatar.png"}
+              src={chat.user.avatar || "./Logos/avatar.png"}
               alt=""
               className={
                 !chat.isGroup

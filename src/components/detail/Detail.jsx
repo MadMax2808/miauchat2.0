@@ -24,7 +24,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 const Detail = () => {
-  const { chatId, user, isCurrentUserBlocked, isReceiverBlocked} =
+  const { chatId, user, isCurrentUserBlocked, isReceiverBlocked } =
     useChatStore();
   const { currentUser } = useUserStore();
   const [showModal, setShowModal] = useState(false);
@@ -162,17 +162,24 @@ const Detail = () => {
             <h4>
               <FontAwesomeIcon icon={faTasks} /> Tareas de la Manada
             </h4>
-            <div className="task-input">
+            <div className="task-input-capsule">
               <input
                 type="text"
                 placeholder="Nueva misión..."
                 value={newTask}
                 onChange={(e) => setNewTask(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addTask();
+                  }
+                }}
               />
               <button onClick={addTask}>
                 <FontAwesomeIcon icon={faPlus} />
               </button>
             </div>
+
             <ul className="task-list">
               {tasks.map((task, index) => (
                 <li
@@ -211,8 +218,6 @@ const Detail = () => {
             </button>
           )
         )}
-
-     
       </div>
 
       {showModal && (

@@ -2,10 +2,11 @@
   width: 500px;
   height: max-content;
   padding: 30px;
-  background-color: rgba(53, 63, 52, 0.881);
 
-  backdrop-filter: blur(16px) saturate(180%);
-  border-radius: 15px;
+  background: rgba(253, 154, 159, 0.664);
+  backdrop-filter: blur(30px) saturate(120%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 28px;
 
   position: absolute;
   top: 0;
@@ -14,7 +15,8 @@
   right: 0;
   margin: auto;
   z-index: 999;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+  box-shadow: 0 15px 35px rgba(43, 58, 74, 0.25);
+
   animation: fadeIn 0.3s ease-out;
 
   form {
@@ -25,32 +27,35 @@
       input {
         flex: 1;
         padding: 15px;
-        border-radius: 10px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        background: rgba(255, 255, 255, 0.05);
+        border-radius: 30px;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        background: rgba(255, 255, 255, 0.15);
         color: white;
         outline: none;
         font-size: 16px;
 
+        &::placeholder {
+          color: rgba(255, 255, 255, 0.7);
+        }
+
         &:focus {
-          border-color: #83c781;
-          box-shadow: 0 0 10px rgba(131, 199, 129, 0.2);
+          background: rgba(255, 255, 255, 0.3);
         }
       }
 
       button {
         padding: 15px 20px;
-        border-radius: 10px;
-        background-color: #3d4b3e;
+        background: rgba(255, 255, 255, 0.15);
+       border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 40px;
         color: white;
-        border: 1px solid rgba(131, 199, 129, 0.3);
+        border: none;
         cursor: pointer;
         transition: all 0.3s;
 
         &:hover:not(:disabled) {
-          background-color: #83c781;
-          color: #1a241b;
-          box-shadow: 0 0 15px rgba(131, 199, 129, 0.4);
+        background: rgba(255, 255, 255, 0.3);
+          border-color: rgba(255, 255, 255, 0.5);
         }
 
         &:disabled {
@@ -67,9 +72,10 @@
     align-items: center;
     justify-content: space-between;
     padding: 15px;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+
     animation: slideUp 0.4s ease-out;
 
     .detail {
@@ -82,7 +88,7 @@
         height: 50px;
         border-radius: 50%;
         object-fit: cover;
-        border: 2px solid #83c781;
+        border: 2px solid white;
       }
 
       span {
@@ -95,17 +101,16 @@
     .add-btn {
       padding: 10px 15px;
       border-radius: 8px;
-      background-color: #83c781;
-      color: #1a241b;
+      background-color: white;
+      color: var(--color-coral-accent);
       border: none;
       cursor: pointer;
       font-weight: 700;
       transition: all 0.3s;
 
       &:hover {
-        background-color: #9de29b;
+        background-color: var(--color-soft-blush);
         transform: scale(1.05);
-        box-shadow: 0 0 15px rgba(131, 199, 129, 0.5);
       }
     }
   }

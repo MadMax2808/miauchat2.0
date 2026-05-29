@@ -20,6 +20,7 @@ import {
   faInfoCircle,
   faImage,
   faSmile,
+  faPaperPlane,
 } from "@fortawesome/free-solid-svg-icons";
 import Videollamada from "../videollamada";
 
@@ -220,6 +221,30 @@ const Chat = ({ setShowDetail, showDetail }) => {
           ...(imgUrl && { img: imgUrl }),
         }),
       });
+
+      const userIDs = [currentUser.id, user.id];
+      userIDs.forEach(async (id) => {
+        const userChatsRef = doc(db, "userchats", id);
+        const userChatsSnapshot = await getDoc(userChatsRef);
+
+        if (userChatsSnapshot.exists()) {
+          const userChatsData = userChatsSnapshot.data();
+
+          const chatIndex = userChatsData.chats.findIndex(
+            (c) => c.chatId === chatId,
+          );
+
+          // Actualizamos el último mensaje, si está visto, y la hora
+          userChatsData.chats[chatIndex].lastMessage = text;
+          userChatsData.chats[chatIndex].isSeen =
+            id === currentUser.id ? true : false;
+          userChatsData.chats[chatIndex].updatedAt = Date.now();
+
+          await updateDoc(userChatsRef, {
+            chats: userChatsData.chats,
+          });
+        }
+      });
     } catch (err) {
       console.log(err);
     } finally {
@@ -270,6 +295,13 @@ const Chat = ({ setShowDetail, showDetail }) => {
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
   return (
     <div
       className="chat"
@@ -318,7 +350,7 @@ const Chat = ({ setShowDetail, showDetail }) => {
               width: "22px",
               height: "22px",
               cursor: "pointer",
-              color: "rgba(255, 255, 255, 0.8)",
+              color: "#f97077",
             }}
             title="Iniciar videollamada"
           />
@@ -329,7 +361,7 @@ const Chat = ({ setShowDetail, showDetail }) => {
               width: "22px",
               height: "22px",
               cursor: "pointer",
-              color: "rgba(255, 255, 255, 0.8)",
+              color: "#f97077",
             }}
             title="Detalles"
           />
@@ -358,7 +390,7 @@ const Chat = ({ setShowDetail, showDetail }) => {
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{
-                      color: "#83c781",
+                      color: "rgba(43, 58, 74, 0.5)",
                       textDecoration: "underline",
                       display: "flex",
                       alignItems: "center",
@@ -367,7 +399,7 @@ const Chat = ({ setShowDetail, showDetail }) => {
                   >
                     <FontAwesomeIcon
                       icon={faLocationDot}
-                      style={{ color: "#83c781" }}
+                      style={{ color: "rgba(43, 58, 74, 0.5)" }}
                     />
                     Ver ubicación en Google Maps
                   </a>
@@ -409,9 +441,10 @@ const Chat = ({ setShowDetail, showDetail }) => {
         className="bottom"
         style={{ borderRadius: showDetail ? "0" : "0 0 20px 0" }}
       >
-        <div className="icons">
-          <label htmlFor="file">
-            <img src="./img.png" alt="" />
+        <div className="chat-input-capsule">
+          {/* Botón de adjuntar */}
+          <label htmlFor="file" className="action-icon-btn">
+            <FontAwesomeIcon icon={faImage} title="Adjuntar imagen" />
           </label>
           <input
             type="file"
@@ -419,43 +452,47 @@ const Chat = ({ setShowDetail, showDetail }) => {
             style={{ display: "none" }}
             onChange={handleImg}
           />
-          {/* Botón para enviar ubicación */}
+
+          {/* Botón de ubicación */}
           <button
-            className="locationButton"
+            className="action-icon-btn"
             title="Enviar ubicación"
             onClick={handleSendLocation}
-            style={{ background: "none", border: "none", cursor: "pointer" }}
           >
-            <FontAwesomeIcon
-              icon={faLocationDot}
-              style={{ color: "#FFFFFF" }}
-            />
+            <FontAwesomeIcon icon={faLocationDot} />
+          </button>
+
+          {/* Input de texto */}
+          <input
+            type="text"
+            className="chat-input-text"
+            placeholder="Type a message..."
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={handleKeyDown}
+          />
+
+          {/* Emoji Picker */}
+          <div className="emoji-container">
+            {otraPatiracha === 9 && (
+              <>
+                <FontAwesomeIcon
+                  icon={faSmile}
+                  className="action-icon-btn emoji-icon"
+                  onClick={() => setOpen((prev) => !prev)}
+                />
+                <div className="picker">
+                  <EmojiPicker open={open} onEmojiClick={handleEmoji} />
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Botón de Enviar */}
+          <button className="send-btn" onClick={handleSend}>
+            <FontAwesomeIcon icon={faPaperPlane} className="send-icon" />
           </button>
         </div>
-        <input
-          type="text"
-          placeholder="Type a message"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-        />
-        <div className="emoji">
-          {otraPatiracha === 9 && ( // Mostrar solo si otraPatiracha está al máximo
-            <>
-              <img
-                src="./emoji.png"
-                alt=""
-                onClick={() => setOpen((prev) => !prev)}
-              />
-              <div className="picker">
-                <EmojiPicker open={open} onEmojiClick={handleEmoji} />
-              </div>
-            </>
-          )}
-        </div>
-
-        <button className="sendButton" onClick={handleSend}>
-          Enviar
-        </button>
       </div>
 
       {isVideoCallActive && (
